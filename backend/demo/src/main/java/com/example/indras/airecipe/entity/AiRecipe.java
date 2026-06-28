@@ -1,11 +1,13 @@
 package com.example.indras.airecipe.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "ai_recipe")
+@TableName("ai_recipe")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,43 +15,36 @@ import java.time.LocalDateTime;
 @Builder
 public class AiRecipe {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
-    @Column(name = "source_type")
+    @TableField("source_type")
     private String sourceType;
-    @Column(name = "recipe_name")
+    @TableField("recipe_name")
     private String recipeName;
     private String description;
-    @Column(name = "recognized_foods_json")
-    @Lob
+    @TableField("recognized_foods_json")
     private String recognizedFoodsJson;
-    @Column(name = "ingredients_json")
-    @Lob
+    @TableField("ingredients_json")
     private String ingredientsJson;
-    @Column(name = "nutrition_json")
-    @Lob
+    @TableField("nutrition_json")
     private String nutritionJson;
-    @Column(name = "suitability_score")
+    @TableField("suitability_score")
     private Integer suitabilityScore;
-    @Column(name = "suitability_reason")
+    @TableField("suitability_reason")
     private String suitabilityReason;
-    @Column(name = "health_tips_json")
-    @Lob
+    @TableField("health_tips_json")
     private String healthTipsJson;
-    @Column(name = "warnings_json")
-    @Lob
+    @TableField("warnings_json")
     private String warningsJson;
-    @Column(name = "raw_response_json")
-    @Lob
+    @TableField("raw_response_json")
     private String rawResponseJson;
-    @Column(name = "source_image_url")
+    @TableField("source_image_url")
     private String sourceImageUrl;
-    @Column(name = "source_image_key")
+    @TableField("source_image_key")
     private String sourceImageKey;
     private String status;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

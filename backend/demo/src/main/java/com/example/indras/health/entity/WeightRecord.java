@@ -1,13 +1,15 @@
 package com.example.indras.health.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "weight_record")
+@TableName("weight_record")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,15 +17,14 @@ import java.time.LocalDateTime;
 @Builder
 public class WeightRecord {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
-    @Column(name = "record_date")
+    @TableField("record_date")
     private LocalDate recordDate;
-    @Column(name = "weight_kg")
+    @TableField("weight_kg")
     private BigDecimal weightKg;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

@@ -1,11 +1,13 @@
 package com.example.indras.mealplan.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "meal_plan_item")
+@TableName("meal_plan_item")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,22 +15,21 @@ import java.math.BigDecimal;
 @Builder
 public class MealPlanItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "plan_id")
+    @TableField("plan_id")
     private Long planId;
-    @Column(name = "meal_type")
+    @TableField("meal_type")
     private String mealType;
-    @Column(name = "recipe_id")
+    @TableField("recipe_id")
     private Long recipeId;
-    @Column(name = "recipe_name")
+    @TableField("recipe_name")
     private String recipeName;
     private BigDecimal calorie;
-    @Column(name = "suitability_score")
+    @TableField("suitability_score")
     private Integer suitabilityScore;
-    @Column(name = "recommend_reason")
+    @TableField("recommend_reason")
     private String recommendReason;
-    @Column(name = "sort_no")
+    @TableField("sort_no")
     private Integer sortNo;
 }

@@ -1,13 +1,15 @@
 package com.example.indras.mealplan.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "meal_plan_feedback")
+@TableName("meal_plan_feedback")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,24 +17,23 @@ import java.time.LocalDateTime;
 @Builder
 public class MealPlanFeedback {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "plan_id")
+    @TableField("plan_id")
     private Long planId;
-    @Column(name = "plan_item_id")
+    @TableField("plan_item_id")
     private Long planItemId;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
-    @Column(name = "meal_type")
+    @TableField("meal_type")
     private String mealType;
-    @Column(name = "feedback_date")
+    @TableField("feedback_date")
     private LocalDate feedbackDate;
     private String status;
-    @Column(name = "actual_ratio")
+    @TableField("actual_ratio")
     private BigDecimal actualRatio;
     private String reason;
     private String remark;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

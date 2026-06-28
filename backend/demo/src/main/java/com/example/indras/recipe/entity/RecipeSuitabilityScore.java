@@ -1,11 +1,13 @@
 package com.example.indras.recipe.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "recipe_suitability_score")
+@TableName("recipe_suitability_score")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,23 +15,22 @@ import java.time.LocalDateTime;
 @Builder
 public class RecipeSuitabilityScore {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
-    @Column(name = "recipe_id")
+    @TableField("recipe_id")
     private Long recipeId;
     private Integer score;
-    @Column(name = "calorie_score")
+    @TableField("calorie_score")
     private Integer calorieScore;
-    @Column(name = "macro_score")
+    @TableField("macro_score")
     private Integer macroScore;
-    @Column(name = "preference_score")
+    @TableField("preference_score")
     private Integer preferenceScore;
-    @Column(name = "risk_score")
+    @TableField("risk_score")
     private Integer riskScore;
     private String reason;
-    @Column(name = "calculated_at")
+    @TableField("calculated_at")
     private LocalDateTime calculatedAt;
 }

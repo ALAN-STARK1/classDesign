@@ -1,11 +1,13 @@
 package com.example.indras.health.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
 
-@Entity
-@Table(name = "user_allergen")
+@TableName("user_allergen")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,11 +15,10 @@ import lombok.*;
 @Builder
 public class UserAllergen {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
-    @Column(name = "allergen_name")
+    @TableField("allergen_name")
     private String allergenName;
 }

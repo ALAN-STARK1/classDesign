@@ -1,11 +1,13 @@
 package com.example.indras.health.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "user_preference")
+@TableName("user_preference")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,21 +15,20 @@ import java.time.LocalDateTime;
 @Builder
 public class UserPreference {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
-    @Column(name = "liked_tags")
+    @TableField("liked_tags")
     private String likedTags;
-    @Column(name = "disliked_ingredients")
+    @TableField("disliked_ingredients")
     private String dislikedIngredients;
-    @Column(name = "preferred_cuisines")
+    @TableField("preferred_cuisines")
     private String preferredCuisines;
-    @Column(name = "spice_level")
+    @TableField("spice_level")
     private String spiceLevel;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
-    @Column(name = "updated_at")
+    @TableField("updated_at")
     private LocalDateTime updatedAt;
 }

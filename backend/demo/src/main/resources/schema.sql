@@ -1,5 +1,6 @@
 -- 智能健康膳食管理系统 H2 数据库表结构
 -- 对应《智能健康膳食管理系统业务后端设计文档-H2版》第 9 章
+-- H2 使用 MODE=MySQL，大文本字段统一用 LONGTEXT（勿用 CLOB）
 
 CREATE TABLE IF NOT EXISTS sys_user (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -270,7 +271,7 @@ CREATE TABLE IF NOT EXISTS nutrition_report (
     completion_rate      DECIMAL(5,2)  NOT NULL DEFAULT 0,
     risk_count           INT           NOT NULL DEFAULT 0,
     summary              VARCHAR(1000),
-    suggestions_json     CLOB,
+    suggestions_json     LONGTEXT,
     created_at           TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -280,14 +281,14 @@ CREATE TABLE IF NOT EXISTS ai_recipe (
     source_type             VARCHAR(20)   NOT NULL,
     recipe_name             VARCHAR(100)  NOT NULL,
     description             VARCHAR(1000),
-    recognized_foods_json   CLOB,
-    ingredients_json        CLOB,
-    nutrition_json          CLOB,
+    recognized_foods_json   LONGTEXT,
+    ingredients_json        LONGTEXT,
+    nutrition_json          LONGTEXT,
     suitability_score       INT           DEFAULT 0,
     suitability_reason      VARCHAR(1000),
-    health_tips_json        CLOB,
-    warnings_json           CLOB,
-    raw_response_json       CLOB,
+    health_tips_json        LONGTEXT,
+    warnings_json           LONGTEXT,
+    raw_response_json       LONGTEXT,
     source_image_url        VARCHAR(500),
     source_image_key        VARCHAR(200),
     status                  VARCHAR(20)   NOT NULL DEFAULT 'PARSED',
@@ -316,7 +317,7 @@ CREATE TABLE IF NOT EXISTS community_post (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id         BIGINT        NOT NULL,
     title           VARCHAR(100)  NOT NULL,
-    content         CLOB          NOT NULL,
+    content         LONGTEXT          NOT NULL,
     recipe_name     VARCHAR(100),
     tags_json       VARCHAR(500),
     source_type     VARCHAR(30)   NOT NULL DEFAULT 'MANUAL',

@@ -1,11 +1,13 @@
 package com.example.indras.admin.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "access_log")
+@TableName("access_log")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,20 +15,19 @@ import java.time.LocalDateTime;
 @Builder
 public class AccessLog {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
     private String method;
     private String path;
     private String ip;
-    @Column(name = "elapsed_ms")
+    @TableField("elapsed_ms")
     private Integer elapsedMs;
-    @Column(name = "status_code")
+    @TableField("status_code")
     private Integer statusCode;
-    @Column(name = "biz_code")
+    @TableField("biz_code")
     private Integer bizCode;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

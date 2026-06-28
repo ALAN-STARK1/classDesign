@@ -1,11 +1,13 @@
 package com.example.indras.risk.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "nutrition_risk_rule")
+@TableName("nutrition_risk_rule")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,19 +15,18 @@ import java.math.BigDecimal;
 @Builder
 public class NutritionRiskRule {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "rule_code")
+    @TableField("rule_code")
     private String ruleCode;
-    @Column(name = "rule_name")
+    @TableField("rule_name")
     private String ruleName;
     private String scenario;
     private String nutrient;
     private String operator;
-    @Column(name = "threshold_min")
+    @TableField("threshold_min")
     private BigDecimal thresholdMin;
-    @Column(name = "threshold_max")
+    @TableField("threshold_max")
     private BigDecimal thresholdMax;
     private String severity;
     private String message;

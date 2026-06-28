@@ -1,11 +1,13 @@
 package com.example.indras.user.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "sys_user")
+@TableName("sys_user")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,15 +15,14 @@ import java.time.LocalDateTime;
 @Builder
 public class SysUser {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
     private String username;
     private String email;
-    @Column(name = "password_hash")
+    @TableField("password_hash")
     private String passwordHash;
     private String role;
     private String status;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

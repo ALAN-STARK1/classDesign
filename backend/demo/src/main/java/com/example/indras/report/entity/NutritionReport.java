@@ -1,13 +1,15 @@
 package com.example.indras.report.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "nutrition_report")
+@TableName("nutrition_report")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,37 +17,35 @@ import java.time.LocalDateTime;
 @Builder
 public class NutritionReport {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
-    @Column(name = "report_type")
+    @TableField("report_type")
     private String reportType;
-    @Column(name = "start_date")
+    @TableField("start_date")
     private LocalDate startDate;
-    @Column(name = "end_date")
+    @TableField("end_date")
     private LocalDate endDate;
-    @Column(name = "avg_calorie")
+    @TableField("avg_calorie")
     private BigDecimal avgCalorie;
-    @Column(name = "avg_protein")
+    @TableField("avg_protein")
     private BigDecimal avgProtein;
-    @Column(name = "avg_fat")
+    @TableField("avg_fat")
     private BigDecimal avgFat;
-    @Column(name = "avg_carbohydrate")
+    @TableField("avg_carbohydrate")
     private BigDecimal avgCarbohydrate;
-    @Column(name = "target_days")
+    @TableField("target_days")
     private Integer targetDays;
-    @Column(name = "record_days")
+    @TableField("record_days")
     private Integer recordDays;
-    @Column(name = "completion_rate")
+    @TableField("completion_rate")
     private BigDecimal completionRate;
-    @Column(name = "risk_count")
+    @TableField("risk_count")
     private Integer riskCount;
     private String summary;
-    @Column(name = "suggestions_json")
-    @Lob
+    @TableField("suggestions_json")
     private String suggestionsJson;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

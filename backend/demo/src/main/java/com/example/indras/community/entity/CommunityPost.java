@@ -1,11 +1,13 @@
 package com.example.indras.community.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "community_post")
+@TableName("community_post")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,31 +15,29 @@ import java.time.LocalDateTime;
 @Builder
 public class CommunityPost {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
     private String title;
-    @Lob
     private String content;
-    @Column(name = "recipe_name")
+    @TableField("recipe_name")
     private String recipeName;
-    @Column(name = "tags_json")
+    @TableField("tags_json")
     private String tagsJson;
-    @Column(name = "source_type")
+    @TableField("source_type")
     private String sourceType;
-    @Column(name = "source_id")
+    @TableField("source_id")
     private Long sourceId;
     private String status;
-    @Column(name = "like_count")
+    @TableField("like_count")
     private Integer likeCount;
-    @Column(name = "comment_count")
+    @TableField("comment_count")
     private Integer commentCount;
-    @Column(name = "favorite_count")
+    @TableField("favorite_count")
     private Integer favoriteCount;
-    @Column(name = "published_at")
+    @TableField("published_at")
     private LocalDateTime publishedAt;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

@@ -1,12 +1,14 @@
 package com.example.indras.risk.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "nutrition_risk_result")
+@TableName("nutrition_risk_result")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,22 +16,21 @@ import java.time.LocalDateTime;
 @Builder
 public class NutritionRiskResult {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
-    @Column(name = "rule_id")
+    @TableField("rule_id")
     private Long ruleId;
-    @Column(name = "source_type")
+    @TableField("source_type")
     private String sourceType;
-    @Column(name = "source_id")
+    @TableField("source_id")
     private Long sourceId;
-    @Column(name = "risk_date")
+    @TableField("risk_date")
     private LocalDate riskDate;
     private String severity;
     private String message;
     private String suggestion;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

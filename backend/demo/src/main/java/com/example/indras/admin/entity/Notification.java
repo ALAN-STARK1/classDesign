@@ -1,11 +1,13 @@
 package com.example.indras.admin.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "notification")
+@TableName("notification")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,20 +15,19 @@ import java.time.LocalDateTime;
 @Builder
 public class Notification {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
     private String type;
     private String title;
     private String content;
-    @Column(name = "read_flag")
+    @TableField("read_flag")
     private Boolean readFlag;
-    @Column(name = "related_type")
+    @TableField("related_type")
     private String relatedType;
-    @Column(name = "related_id")
+    @TableField("related_id")
     private Long relatedId;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

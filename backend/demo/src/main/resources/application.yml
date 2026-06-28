@@ -2,30 +2,23 @@ spring:
   application:
     name: indras-backend
   datasource:
-    url: jdbc:h2:mem:indras;MODE=MySQL;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: true
-    open-in-view: false
-    properties:
-      hibernate:
-        format_sql: true
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:schema.sql
-      data-locations: classpath:data.sql
+    url: jdbc:mysql://localhost:3306/food_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 server:
   port: 8080
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.example.indras.**.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
 
 jwt:
   secret: indras-demo-jwt-secret-key-change-in-production

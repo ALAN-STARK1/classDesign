@@ -1,11 +1,13 @@
 package com.example.indras.community.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "community_comment")
+@TableName("community_comment")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,14 +15,13 @@ import java.time.LocalDateTime;
 @Builder
 public class CommunityComment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "post_id")
+    @TableField("post_id")
     private Long postId;
-    @Column(name = "user_id")
+    @TableField("user_id")
     private Long userId;
     private String content;
-    @Column(name = "created_at")
+    @TableField("created_at")
     private LocalDateTime createdAt;
 }

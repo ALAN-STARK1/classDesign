@@ -1,11 +1,13 @@
 package com.example.indras.recipe.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
 
-@Entity
-@Table(name = "recipe_step")
+@TableName("recipe_step")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,12 +15,11 @@ import lombok.*;
 @Builder
 public class RecipeStep {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    @Column(name = "recipe_id")
+    @TableField("recipe_id")
     private Long recipeId;
-    @Column(name = "step_no")
+    @TableField("step_no")
     private Integer stepNo;
     private String content;
 }
