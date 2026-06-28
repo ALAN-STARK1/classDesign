@@ -1,5 +1,7 @@
--- 演示数据初始化脚本
+-- 演示数据初始化脚本（数据库: food_management）
 -- 账号: admin/admin123, alice/user123, bob/user123, carol/user123
+
+USE food_management;
 
 -- ========== 用户账号 ==========
 INSERT INTO sys_user (id, username, email, password_hash, role, status, created_at) VALUES

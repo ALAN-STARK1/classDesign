@@ -12,6 +12,7 @@ public class AiRecipeListItemVO {
 
     private Long id;
     private String recipeName;
+    private String name;
     private String sourceType;
     private String status;
     private Integer suitabilityScore;

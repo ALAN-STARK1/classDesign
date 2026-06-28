@@ -1,6 +1,12 @@
--- 智能健康膳食管理系统 H2 数据库表结构
+-- 智能健康膳食管理系统 MySQL 数据库表结构
+-- 数据库名: food_management
 -- 对应《智能健康膳食管理系统业务后端设计文档-H2版》第 9 章
--- H2 使用 MODE=MySQL，大文本字段统一用 LONGTEXT（勿用 CLOB）
+
+CREATE DATABASE IF NOT EXISTS food_management
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE food_management;
 
 CREATE TABLE IF NOT EXISTS sys_user (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,

@@ -12,6 +12,8 @@ public class MealRecordSummaryVO {
     private Long id;
     private String mealType;
     private String sourceType;
+    private String foodName;
+    private BigDecimal amountG;
     private BigDecimal totalCalorie;
     private BigDecimal totalProtein;
     private BigDecimal totalFat;

@@ -178,7 +178,7 @@ onMounted(load)
             </template>
           </el-table-column>
           <el-table-column prop="category" label="分类" width="120">
-            <template #default="{ row }">{{ IngredientCategoryLabel[row.category] }}</template>
+            <template #default="{ row }">{{ IngredientCategoryLabel[row.category] || row.category }}</template>
           </el-table-column>
           <el-table-column prop="caloriePer100g" label="热量/100g" width="120">
             <template #default="{ row }">{{ Math.round(row.caloriePer100g) }} kcal</template>

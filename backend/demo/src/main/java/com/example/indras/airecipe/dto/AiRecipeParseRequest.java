@@ -9,5 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 public class AiRecipeParseRequest {
 
+    private String text;
     private String prompt;
 }

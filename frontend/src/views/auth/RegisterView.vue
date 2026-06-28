@@ -36,7 +36,7 @@ async function submit() {
       <div class="auth-copy">
         <span class="eyebrow">NEW PROFILE</span>
         <h1>创建账户</h1>
-        <p>注册接口已接入 Mock，可在错误场景下验证字段提示。</p>
+        <p>注册后将连接后端真实 API 创建账户。</p>
       </div>
 
       <el-form class="stack-form" :model="form" label-position="top" @keyup.enter="submit">

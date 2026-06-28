@@ -1,30 +1,56 @@
 import { ENDPOINTS } from '../../api/endpoints'
 import { request } from '../request/http'
-import { bridgeParseImage, bridgeParseText } from '../ai-bridge'
 
-// ===== AI 解析走 ai-bridge 直连 ai-service =====
-// 其他 CRUD（history / detail / confirm / convert / delete）仍需后端 DB，继续走 Mock
+function normalizeAiRecipe(data) {
+  if (!data) return data
+  const nutrition = data.nutritionEstimate || {}
+  return {
+    ...data,
+    name: data.name || data.recipeName,
+    confidence: data.confidence ?? data.suitabilityScore ?? 0,
+    totalCalorie: data.totalCalorie ?? nutrition.calories ?? 0,
+    totalProtein: data.totalProtein ?? nutrition.protein ?? 0,
+    totalFat: data.totalFat ?? nutrition.fat ?? 0,
+    totalCarbohydrate: data.totalCarbohydrate ?? nutrition.carbohydrate ?? 0,
+    steps: data.steps || data.cookingSteps || [],
+    ingredients: data.ingredients || [],
+    warnings: data.warnings || [],
+  }
+}
 
 export function parseAiRecipeText(payload) {
-  return bridgeParseText(payload)
+  return request.post(ENDPOINTS.aiRecipes.parse, payload).then(normalizeAiRecipe)
 }
 
 export function parseAiRecipeImage(file, prompt = '') {
-  return bridgeParseImage(file, prompt)
+  const formData = new FormData()
+  formData.append('file', file)
+  if (prompt) {
+    formData.append('prompt', prompt)
+  }
+  return request
+    .post(ENDPOINTS.aiRecipes.parseImage, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    .then(normalizeAiRecipe)
 }
 
-// ===== 以下接口依赖后端 DB，暂保持 Mock =====
-
 export function fetchAiRecipeDetail(id) {
-  return request.get(ENDPOINTS.aiRecipes.byId(id))
+  return request.get(ENDPOINTS.aiRecipes.byId(id)).then(normalizeAiRecipe)
 }
 
 export function fetchAiRecipeHistory(params) {
-  return request.get(ENDPOINTS.aiRecipes.history, { params })
+  return request.get(ENDPOINTS.aiRecipes.history, { params }).then((result) => {
+    if (!result?.items) return result
+    return {
+      ...result,
+      items: result.items.map(normalizeAiRecipe),
+    }
+  })
 }
 
 export function confirmAiRecipe(id, payload = {}) {
-  return request.patch(ENDPOINTS.aiRecipes.confirm(id), payload)
+  return request.patch(ENDPOINTS.aiRecipes.confirm(id), payload).then(normalizeAiRecipe)
 }
 
 export function convertAiRecipeToRecipe(id, payload = {}) {

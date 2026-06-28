@@ -43,7 +43,7 @@ async function submit() {
       <div class="auth-copy">
         <span class="eyebrow">WELCOME BACK</span>
         <h1>登录健康控制台</h1>
-        <p>用 Mock 账户进入第 1 阶段功能：认证、健康档案和目标周期。</p>
+        <p>使用演示账号 alice/user123 登录，连接后端真实数据。</p>
       </div>
 
       <el-form class="stack-form" :model="form" label-position="top" @keyup.enter="submit">

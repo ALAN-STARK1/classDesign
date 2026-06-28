@@ -14,6 +14,7 @@ public class AiRecipeVO {
 
     private Long id;
     private String recipeName;
+    private String name;
     private String description;
     private Integer suitabilityScore;
     private String suitabilityReason;

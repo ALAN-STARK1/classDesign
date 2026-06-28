@@ -12,12 +12,20 @@ export function disableUser(id, payload) {
 
 // Recipe review
 export function reviewRecipe(id, payload) {
-  return request.patch(ENDPOINTS.admin.reviewRecipe(id), payload)
+  const approved = payload.approved ?? payload.status === 'ONLINE'
+  return request.patch(ENDPOINTS.admin.reviewRecipe(id), {
+    approved,
+    reason: payload.reason,
+  })
 }
 
 // Post review
 export function reviewPost(id, payload) {
-  return request.patch(ENDPOINTS.admin.reviewPost(id), payload)
+  const approved = payload.approved ?? (payload.status === 'PUBLISHED' || payload.status === 'ONLINE')
+  return request.patch(ENDPOINTS.admin.reviewPost(id), {
+    approved,
+    reason: payload.reason,
+  })
 }
 
 // AI call logs
