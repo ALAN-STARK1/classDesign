@@ -48,9 +48,9 @@ async function load() {
   try {
     const [todayData, rangeData, gapData, riskData] = await Promise.all([
       fetchTodayNutrition({ date: filters.date }),
-      fetchNutritionRange({ days: filters.days }),
+      fetchNutritionRange({ days: filters.days, date: filters.date }),
       fetchNutritionGap({ date: filters.date }),
-      fetchNutritionRisks({ date: filters.date }),
+      fetchNutritionRisks({ days: filters.days, date: filters.date }),
     ])
     summary.value = todayData
     trend.value = rangeData || []
