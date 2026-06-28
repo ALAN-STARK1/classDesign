@@ -1,0 +1,24 @@
+[
+  {
+    "phase": "head",
+    "epoch": 1,
+    "train_loss": 2.792381,
+    "train_top1": 0.359419,
+    "train_top5": 0.609663,
+    "val_loss": 1.828966,
+    "val_top1": 0.540238,
+    "val_top5": 0.799564,
+    "seconds": 184.81
+  },
+  {
+    "phase": "finetune",
+    "epoch": 1,
+    "train_loss": 1.880437,
+    "train_top1": 0.535696,
+    "train_top5": 0.780092,
+    "val_loss": 1.115788,
+    "val_top1": 0.700475,
+    "val_top5": 0.907208,
+    "seconds": 148.58
+  }
+]
