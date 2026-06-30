@@ -31,16 +31,14 @@ import com.example.indras.recipe.service.RecipeService;
 import com.example.indras.recipe.vo.RecipeDetailVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.indras.common.storage.LocalFileStorageService;
+import com.example.indras.common.storage.LocalFileStorageService.StoredFile;
+import com.example.indras.airecipe.support.AiRecipeContextBuilder;
+import com.example.indras.config.AiServiceHttpClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -60,13 +58,9 @@ public class AiRecipeServiceImpl implements AiRecipeService {
     private final RecipeService recipeService;
     private final JsonHelper jsonHelper;
     private final ObjectMapper objectMapper;
-    private final RestClient restClient;
-
-    @Value("${ai-service.base-url}")
-    private String aiServiceBaseUrl;
-
-    @Value("${ai-service.internal-token}")
-    private String internalToken;
+    private final AiServiceHttpClient aiServiceHttpClient;
+    private final AiRecipeContextBuilder aiRecipeContextBuilder;
+    private final LocalFileStorageService localFileStorageService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -75,7 +69,7 @@ public class AiRecipeServiceImpl implements AiRecipeService {
         String userInput = buildUserInput(request.getPrompt(), request.getText());
         try {
             JsonNode data = callAiParseText(userId, userInput);
-            AiRecipe saved = saveFromAiResult(userId, "TEXT", data, null, userInput);
+            AiRecipe saved = saveFromAiResult(userId, "TEXT", data, null, null, userInput);
             logAiCall(userId, "TEXT_PARSE", userInput, (int) (System.currentTimeMillis() - start), true, null);
             return toDetailVo(saved);
         } catch (BizException ex) {
@@ -91,10 +85,10 @@ public class AiRecipeServiceImpl implements AiRecipeService {
     @Transactional(rollbackFor = Exception.class)
     public AiRecipeVO parseImage(Long userId, MultipartFile file, String prompt) {
         long start = System.currentTimeMillis();
+        StoredFile storedImage = localFileStorageService.saveAiRecipeImage(file);
         try {
             JsonNode data = callAiParseImage(userId, file, prompt);
-            String imageUrl = "/uploads/ai/" + UUID.randomUUID() + ".jpg";
-            AiRecipe saved = saveFromAiResult(userId, "IMAGE", data, imageUrl, prompt);
+            AiRecipe saved = saveFromAiResult(userId, "IMAGE", data, storedImage.url(), storedImage.key(), prompt);
             logAiCall(userId, "IMAGE_PARSE", "上传食物图片解析", (int) (System.currentTimeMillis() - start), true, null);
             return toDetailVo(saved);
         } catch (BizException ex) {
@@ -210,41 +204,21 @@ public class AiRecipeServiceImpl implements AiRecipeService {
     }
 
     private JsonNode callAiParseText(Long userId, String userInput) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("userId", userId);
-        body.put("userInput", userInput);
-        body.put("recognitionResults", List.of());
-        String response = restClient.post()
-                .uri(aiServiceBaseUrl + "/ai/v1/recipes/parse")
-                .header("X-Internal-Token", internalToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .body(String.class);
+        Map<String, Object> body = aiRecipeContextBuilder.build(userId, userInput);
+        String response = aiServiceHttpClient.postJson("/ai/v1/recipes/parse", body);
         return parseAiResponse(response);
     }
 
     private JsonNode callAiParseImage(Long userId, MultipartFile file, String prompt) throws Exception {
-        Map<String, Object> context = new LinkedHashMap<>();
-        context.put("userId", userId);
-        context.put("userInput", prompt == null ? "" : prompt);
-        context.put("recognitionResults", List.of());
-        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
-        form.add("image", new ByteArrayResource(file.getBytes()) {
-            @Override
-            public String getFilename() {
-                return file.getOriginalFilename() == null ? "upload.jpg" : file.getOriginalFilename();
-            }
-        });
-        form.add("context", objectMapper.writeValueAsString(context));
-        form.add("topK", "5");
-        String response = restClient.post()
-                .uri(aiServiceBaseUrl + "/ai/v1/recipes/parse-from-image")
-                .header("X-Internal-Token", internalToken)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(form)
-                .retrieve()
-                .body(String.class);
+        if (file == null || file.isEmpty()) {
+            throw BizException.badRequest("请上传图片文件");
+        }
+        // ai-service: FoodClassifier 预训练模型识别 → 合并 recognitionResults → DeepSeek 生成菜谱
+        Map<String, Object> context = aiRecipeContextBuilder.build(userId, prompt == null ? "" : prompt);
+        String response = aiServiceHttpClient.postMultipartImage(
+                "/ai/v1/recipes/parse-from-image",
+                file,
+                objectMapper.writeValueAsString(context));
         return parseAiResponse(response);
     }
 
@@ -260,7 +234,7 @@ public class AiRecipeServiceImpl implements AiRecipeService {
         return data;
     }
 
-    private AiRecipe saveFromAiResult(Long userId, String sourceType, JsonNode data, String imageUrl, String summary) {
+    private AiRecipe saveFromAiResult(Long userId, String sourceType, JsonNode data, String imageUrl, String imageKey, String summary) {
         JsonNode suitability = data.path("suitability");
         JsonNode nutrition = data.path("nutritionEstimate");
         AiRecipe recipe = AiRecipe.builder()
@@ -277,6 +251,7 @@ public class AiRecipeServiceImpl implements AiRecipeService {
                 .warningsJson(jsonHelper.write(readStringList(data, "warnings")))
                 .rawResponseJson(data.toString())
                 .sourceImageUrl(imageUrl)
+                .sourceImageKey(imageKey)
                 .status("PARSED")
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -341,6 +316,7 @@ public class AiRecipeServiceImpl implements AiRecipeService {
                 .warnings(jsonHelper.readStringList(recipe.getWarningsJson()))
                 .recognizedFoods(jsonHelper.readList(recipe.getRecognizedFoodsJson(), RecognizedFoodVO.class))
                 .sourceImageUrl(recipe.getSourceImageUrl())
+                .sourceType(recipe.getSourceType())
                 .status(recipe.getStatus())
                 .build();
     }

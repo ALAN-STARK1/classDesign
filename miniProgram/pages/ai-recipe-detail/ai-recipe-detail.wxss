@@ -5,3 +5,11 @@
 .action-btn::after {
   border: none;
 }
+
+.source-image {
+  border-radius: 16rpx;
+  display: block;
+  height: 360rpx;
+  margin-bottom: 12rpx;
+  width: 100%;
+}

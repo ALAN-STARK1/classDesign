@@ -32,4 +32,7 @@ module.exports = {
     ONLINE: '已发布',
     REJECTED: '已拒绝',
   },
+  AllergenOptions: ['花生', '牛奶', '鸡蛋', '海鲜', '坚果', '大豆', '小麦', '芝麻'],
+  RestrictionOptions: ['素食', '低盐', '低糖', '低脂', '无麸质', '清真'],
+  ChronicDiseaseOptions: ['高血压', '糖尿病', '高血脂', '痛风', '肾病'],
 }

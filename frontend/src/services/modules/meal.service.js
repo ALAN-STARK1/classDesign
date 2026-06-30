@@ -43,6 +43,10 @@ export function convertPlanToRecords(planId, payload = {}) {
   return request.post(ENDPOINTS.mealPlans.toRecords(planId), payload)
 }
 
+export function fetchShoppingList(planId) {
+  return request.get(ENDPOINTS.mealPlans.shoppingList(planId))
+}
+
 function normalizeMealRecord(row) {
   if (!row) return row
   return {

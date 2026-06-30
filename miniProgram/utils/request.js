@@ -1,4 +1,4 @@
-const { API_BASE_URL, TOKEN_KEY, REQUEST_TIMEOUT } = require('../config/index')
+const { API_BASE_URL, TOKEN_KEY, REQUEST_TIMEOUT, AI_REQUEST_TIMEOUT } = require('../config/index')
 
 class AppError extends Error {
   constructor({ code, message, type }) {
@@ -99,6 +99,7 @@ function upload(url, filePath, formData, options) {
       name: 'file',
       formData: formData || {},
       header,
+      timeout: (options && options.timeout) || AI_REQUEST_TIMEOUT,
       success(res) {
         let body
         try {

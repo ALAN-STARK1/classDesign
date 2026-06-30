@@ -7,6 +7,11 @@
       <text class="list-item-meta">状态：{{recipe.status || 'PARSED'}}</text>
     </view>
 
+    <view class="panel" wx:if="{{sourceImage}}">
+      <image class="source-image" src="{{sourceImage}}" mode="aspectFill" show-menu-by-longpress />
+      <text class="list-item-meta">识别原图</text>
+    </view>
+
     <view class="panel" wx:if="{{recipe.ingredients && recipe.ingredients.length}}">
       <text class="title">食材</text>
       <view wx:for="{{recipe.ingredients}}" wx:key="index" class="list-item">

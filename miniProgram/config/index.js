@@ -7,4 +7,6 @@ module.exports = {
   TOKEN_KEY: 'indras_token',
   USER_KEY: 'indras_user',
   REQUEST_TIMEOUT: 15000,
+  /** AI 菜谱 / 营养顾问，允许长时间等待 LLM + 图像识别 */
+  AI_REQUEST_TIMEOUT: 120000,
 }

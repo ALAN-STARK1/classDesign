@@ -1,11 +1,15 @@
 const aiService = require('../../services/ai')
+const { resolveUploadUrl } = require('../../utils/media')
 const { showError } = require('../../utils/request')
+
+const PREVIEW_KEY = 'ai_recipe_local_preview'
 
 Page({
   data: {
     id: null,
     loading: true,
     recipe: null,
+    sourceImage: '',
   },
 
   onLoad(options) {
@@ -14,10 +18,29 @@ Page({
     this.loadDetail()
   },
 
+  onUnload() {
+    const cached = wx.getStorageSync(PREVIEW_KEY)
+    if (cached && String(cached.id) === String(this.data.id)) {
+      wx.removeStorageSync(PREVIEW_KEY)
+    }
+  },
+
+  resolveSourceImage(recipe) {
+    const cached = wx.getStorageSync(PREVIEW_KEY)
+    if (cached && String(cached.id) === String(this.data.id) && cached.filePath) {
+      return cached.filePath
+    }
+    return resolveUploadUrl(recipe && recipe.sourceImageUrl)
+  },
+
   async loadDetail() {
     try {
       const recipe = await aiService.fetchAiRecipeDetail(this.data.id)
-      this.setData({ recipe, loading: false })
+      this.setData({
+        recipe,
+        sourceImage: this.resolveSourceImage(recipe),
+        loading: false,
+      })
       wx.setNavigationBarTitle({ title: recipe.name || 'AI 菜谱' })
     } catch (err) {
       showError(err)

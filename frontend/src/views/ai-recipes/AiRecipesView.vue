@@ -1,7 +1,7 @@
 <script setup>
 import { Delete, DocumentAdd, Picture, Promotion, Search, Upload, View, MagicStick } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import StateBlock from '../../components/common/StateBlock.vue'
 import { AiRecipeSourceType, MealType } from '../../constants/enums'
 import { AiRecipeSourceTypeLabel, AiRecipeStatusLabel, MealTypeLabel, RecipeCategoryLabel, toOptions } from '../../constants/labels'
@@ -17,6 +17,7 @@ import {
 } from '../../services/modules/ai.service'
 import { createCommunityPostFromAiRecipe, uploadCommunityPostImage } from '../../services/modules/community.service'
 import { handleRequestError } from '../../services/request/http'
+import { resolveUploadUrl } from '../../utils/media'
 import { today } from '../../utils/date'
 import { formatCalorie } from '../../utils/format'
 
@@ -31,6 +32,8 @@ const history = ref([])
 const detail = ref(null)
 const detailVisible = ref(false)
 const uploadFile = ref(null)
+const uploadPreviewUrl = ref('')
+const localPreviewUrl = ref('')
 const pagination = reactive({ page: 1, size: 8, total: 0 })
 const filters = reactive({ keyword: '', sourceType: '' })
 const textForm = reactive({
@@ -53,15 +56,34 @@ const postForm = reactive({
 
 const sourceOptions = computed(() => [{ label: '全部来源', value: '' }, ...toOptions(AiRecipeSourceType, AiRecipeSourceTypeLabel)])
 const mealOptions = computed(() => toOptions(MealType, MealTypeLabel))
-const canUseAiSourceImage = computed(() => Boolean(detail.value?.sourceImageUrl))
+const canUseAiSourceImage = computed(() => Boolean(displaySourceImage.value))
+const displaySourceImage = computed(() => {
+  if (localPreviewUrl.value) return localPreviewUrl.value
+  if (detail.value?.sourceImageUrl) return resolveUploadUrl(detail.value.sourceImageUrl)
+  if (uploadPreviewUrl.value) return uploadPreviewUrl.value
+  return ''
+})
 const communityImageCount = computed(() => postForm.images.length + (postForm.useAiSourceImage && canUseAiSourceImage.value ? 1 : 0))
 const communityImageHint = computed(() => `${communityImageCount.value}/${MAX_COMMUNITY_IMAGES}`)
+
+function revokeBlobUrl(url) {
+  if (url?.startsWith('blob:')) {
+    URL.revokeObjectURL(url)
+  }
+}
+
+function clearPreviewUrls() {
+  revokeBlobUrl(uploadPreviewUrl.value)
+  revokeBlobUrl(localPreviewUrl.value)
+  uploadPreviewUrl.value = ''
+  localPreviewUrl.value = ''
+}
 
 function resetPostForm() {
   Object.assign(postForm, {
     title: detail.value ? `${detail.value.name} 分享` : '',
     content: '这份 AI 菜谱结构清晰，适合日常记录和转换。',
-    useAiSourceImage: Boolean(detail.value?.sourceImageUrl),
+    useAiSourceImage: Boolean(displaySourceImage.value),
     images: [],
   })
 }
@@ -107,6 +129,8 @@ async function parseText() {
 
 function onFileChange(file) {
   uploadFile.value = file.raw
+  revokeBlobUrl(uploadPreviewUrl.value)
+  uploadPreviewUrl.value = URL.createObjectURL(file.raw)
 }
 
 async function parseImage() {
@@ -115,14 +139,22 @@ async function parseImage() {
     return
   }
   parsing.value = true
+  localPreviewUrl.value = uploadPreviewUrl.value
+  uploadPreviewUrl.value = ''
   try {
     detail.value = await parseAiRecipeImage(uploadFile.value, imageForm.prompt)
+    if (detail.value?.sourceImageUrl) {
+      revokeBlobUrl(localPreviewUrl.value)
+      localPreviewUrl.value = ''
+    }
     resetPostForm()
     detailVisible.value = true
     uploadFile.value = null
     ElMessage.success('图片解析完成')
     await load()
   } catch (err) {
+    revokeBlobUrl(localPreviewUrl.value)
+    localPreviewUrl.value = ''
     handleRequestError(err)
   } finally {
     parsing.value = false
@@ -131,6 +163,7 @@ async function parseImage() {
 
 async function openDetail(row) {
   try {
+    clearPreviewUrls()
     detail.value = await fetchAiRecipeDetail(row.id)
     resetPostForm()
     detailVisible.value = true
@@ -242,6 +275,7 @@ async function remove(row) {
 }
 
 onMounted(load)
+onBeforeUnmount(clearPreviewUrls)
 </script>
 
 <template>
@@ -277,9 +311,17 @@ onMounted(load)
               <h2>图片解析</h2>
             </div>
           </div>
-          <el-upload drag :auto-upload="false" :limit="1" :on-change="onFileChange">
-            <el-icon><Upload /></el-icon>
-            <div class="upload-copy">{{ uploadFile?.name || '选择菜品图片' }}</div>
+          <el-upload drag :auto-upload="false" :limit="1" :show-file-list="false" :on-change="onFileChange">
+            <template v-if="uploadPreviewUrl">
+              <div class="upload-image-preview">
+                <img :src="uploadPreviewUrl" alt="待解析菜品图" />
+                <span>点击或拖拽可重新选择</span>
+              </div>
+            </template>
+            <template v-else>
+              <el-icon><Upload /></el-icon>
+              <div class="upload-copy">选择菜品图片</div>
+            </template>
           </el-upload>
           <el-form class="stack-form dense image-prompt" :model="imageForm" label-position="top">
             <el-form-item label="提示词">
@@ -354,8 +396,9 @@ onMounted(load)
           <strong>{{ detail.name }}</strong>
           <small>{{ RecipeCategoryLabel[detail.category] }} · {{ detail.confidence }}% 置信度</small>
         </div>
-        <div v-if="detail.sourceImageUrl" class="ai-source-image">
-          <img :src="detail.sourceImageUrl" :alt="detail.name" />
+        <div v-if="displaySourceImage" class="ai-source-image">
+          <img :src="displaySourceImage" :alt="detail.name" />
+          <small v-if="detail.sourceType === 'IMAGE'">识别原图</small>
         </div>
         <div class="nutrition-strip">
           <span>{{ formatCalorie(detail.totalCalorie) }}</span>
@@ -420,7 +463,7 @@ onMounted(load)
                     <span>优先复用 AI 原图</span>
                   </label>
                   <div class="source-image-preview">
-                    <img :src="detail.sourceImageUrl" :alt="detail.name" />
+                    <img :src="displaySourceImage" :alt="detail.name" />
                   </div>
                 </div>
                 <div v-else class="source-image-empty">

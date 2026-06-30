@@ -24,5 +24,6 @@ public class AiRecipeVO {
     private List<String> warnings;
     private List<RecognizedFoodVO> recognizedFoods;
     private String sourceImageUrl;
+    private String sourceType;
     private String status;
 }

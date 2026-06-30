@@ -43,4 +43,12 @@ public class IngredientController {
     public ApiResponse<IngredientVO> disable(@PathVariable Long id) {
         return ApiResponse.success(ingredientService.disable(id));
     }
+
+    @GetMapping("/{id}/pairings")
+    public ApiResponse<java.util.List<com.example.indras.ingredient.vo.IngredientPairingVO>> pairings(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ApiResponse.success(ingredientService.pairings(
+                com.example.indras.common.context.UserContext.requireUserId(), id, limit));
+    }
 }

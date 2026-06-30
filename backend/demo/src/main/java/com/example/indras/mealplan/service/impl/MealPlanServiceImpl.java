@@ -26,6 +26,10 @@ import com.example.indras.mealplan.service.MealPlanService;
 import com.example.indras.mealplan.vo.*;
 import com.example.indras.mealrecord.entity.MealRecord;
 import com.example.indras.mealrecord.mapper.MealRecordMapper;
+import com.example.indras.ingredient.entity.Ingredient;
+import com.example.indras.ingredient.mapper.IngredientMapper;
+import com.example.indras.recipe.entity.RecipeIngredient;
+import com.example.indras.recipe.mapper.RecipeIngredientMapper;
 import com.example.indras.recipe.entity.Recipe;
 import com.example.indras.recipe.entity.RecipeSuitabilityScore;
 import com.example.indras.recipe.mapper.RecipeMapper;
@@ -41,6 +45,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +70,8 @@ public class MealPlanServiceImpl implements MealPlanService {
     private final RecipeSuitabilityScoreMapper recipeSuitabilityScoreMapper;
     private final HealthProfileMapper healthProfileMapper;
     private final RecipeService recipeService;
+    private final RecipeIngredientMapper recipeIngredientMapper;
+    private final IngredientMapper ingredientMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -326,6 +333,45 @@ public class MealPlanServiceImpl implements MealPlanService {
             created++;
         }
         return CountResultVO.builder().created(created).build();
+    }
+
+    @Override
+    public ShoppingListVO shoppingList(Long userId, Long planId) {
+        MealPlan plan = requireOwnedPlan(userId, planId);
+        List<MealPlanItem> items = mealPlanItemMapper.selectList(Wrappers.<MealPlanItem>lambdaQuery()
+                .eq(MealPlanItem::getPlanId, planId));
+        Map<Long, BigDecimal> amountMap = new HashMap<>();
+        for (MealPlanItem item : items) {
+            List<RecipeIngredient> recipeIngredients = recipeIngredientMapper.selectList(
+                    Wrappers.<RecipeIngredient>lambdaQuery().eq(RecipeIngredient::getRecipeId, item.getRecipeId()));
+            for (RecipeIngredient ri : recipeIngredients) {
+                amountMap.merge(ri.getIngredientId(),
+                        ri.getAmountG() == null ? BigDecimal.ZERO : ri.getAmountG(),
+                        BigDecimal::add);
+            }
+        }
+        List<ShoppingListItemVO> shoppingItems = amountMap.entrySet().stream()
+                .map(entry -> {
+                    Ingredient ingredient = ingredientMapper.selectById(entry.getKey());
+                    if (ingredient == null) {
+                        return null;
+                    }
+                    return ShoppingListItemVO.builder()
+                            .ingredientId(ingredient.getId())
+                            .name(ingredient.getName())
+                            .unit(ingredient.getUnit())
+                            .amount(entry.getValue())
+                            .category(ingredient.getCategory())
+                            .build();
+                })
+                .filter(java.util.Objects::nonNull)
+                .sorted(Comparator.comparing(ShoppingListItemVO::getCategory, Comparator.nullsLast(String::compareTo)))
+                .toList();
+        return ShoppingListVO.builder()
+                .planId(planId)
+                .planDate(plan.getPlanDate())
+                .items(shoppingItems)
+                .build();
     }
 
     private int resolveTargetCalorie(Long userId, MealPlanGenerateRequest request) {

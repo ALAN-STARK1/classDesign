@@ -15,11 +15,13 @@ from fastapi.responses import JSONResponse
 
 from app.api.food_classifier import router as food_router
 from app.api.health import router as health_router
+from app.api.llm_chat import router as llm_router
 from app.api.recipe_parser import router as recipe_router
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.schemas.common import ApiResponse
 from app.services.classifier_service import FoodClassifierService
+from app.services.llm_chat_service import LLMChatService
 from app.services.llm_recipe_service import LLMRecipeService
 from app.utils.timer import elapsed_ms, now
 
@@ -34,6 +36,7 @@ async def lifespan(app: FastAPI):
     app.state.settings = settings
     app.state.classifier_service = FoodClassifierService(settings.resolved_food_model_path, settings.device)
     app.state.llm_service = LLMRecipeService(settings)
+    app.state.chat_service = LLMChatService(settings)
     yield
 
 
@@ -41,6 +44,7 @@ app = FastAPI(title="ai-service", version="1.0.0", lifespan=lifespan)
 app.include_router(health_router, prefix="/ai/v1")
 app.include_router(food_router, prefix="/ai/v1")
 app.include_router(recipe_router, prefix="/ai/v1")
+app.include_router(llm_router, prefix="/ai/v1")
 
 
 @app.exception_handler(AppError)

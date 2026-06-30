@@ -10,6 +10,12 @@ export const ENDPOINTS = {
     summary: '/health-profile/me/summary',
     allergens: '/health-profile/me/allergens',
     restrictions: '/health-profile/me/restrictions',
+    chronicDiseases: '/health-profile/me/chronic-diseases',
+  },
+  weightRecords: {
+    base: '/weight-records',
+    trend: '/weight-records/trend',
+    byId: (id) => `/weight-records/${id}`,
   },
   healthGoalCycles: {
     base: '/health-goal-cycles',
@@ -23,6 +29,7 @@ export const ENDPOINTS = {
     base: '/ingredients',
     byId: (id) => `/ingredients/${id}`,
     disable: (id) => `/ingredients/${id}/disable`,
+    pairings: (id) => `/ingredients/${id}/pairings`,
   },
   recipes: {
     base: '/recipes',
@@ -43,6 +50,12 @@ export const ENDPOINTS = {
     feedback: (planId) => `/meal-plans/${planId}/feedback`,
     completion: (planId) => `/meal-plans/${planId}/completion`,
     toRecords: (planId) => `/meal-plans/${planId}/to-records`,
+    shoppingList: (planId) => `/meal-plans/${planId}/shopping-list`,
+  },
+  aiAdvisor: {
+    chat: '/ai/advisor/chat',
+    todayDiagnosis: '/ai/advisor/today-diagnosis',
+    weekPoster: (planId) => `/ai/advisor/week-poster/${planId}`,
   },
   mealRecords: {
     base: '/meal-records',

@@ -4,6 +4,7 @@ import com.example.indras.common.api.ApiResponse;
 import com.example.indras.common.context.UserContext;
 import com.example.indras.health.dto.AllergensUpdateRequest;
 import com.example.indras.health.dto.HealthProfileSaveRequest;
+import com.example.indras.health.dto.ChronicDiseasesUpdateRequest;
 import com.example.indras.health.dto.RestrictionsUpdateRequest;
 import com.example.indras.health.service.HealthProfileService;
 import com.example.indras.health.vo.HealthProfileSummaryVO;
@@ -44,5 +45,10 @@ public class HealthProfileController {
     @PutMapping("/me/restrictions")
     public ApiResponse<List<String>> updateRestrictions(@Valid @RequestBody RestrictionsUpdateRequest request) {
         return ApiResponse.success(healthProfileService.updateRestrictions(UserContext.requireUserId(), request));
+    }
+
+    @PutMapping("/me/chronic-diseases")
+    public ApiResponse<List<String>> updateChronicDiseases(@Valid @RequestBody ChronicDiseasesUpdateRequest request) {
+        return ApiResponse.success(healthProfileService.updateChronicDiseases(UserContext.requireUserId(), request));
     }
 }

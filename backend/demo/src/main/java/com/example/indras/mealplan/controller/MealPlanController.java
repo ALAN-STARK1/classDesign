@@ -80,4 +80,9 @@ public class MealPlanController {
                                                     @Valid @RequestBody MealPlanToRecordsRequest request) {
         return ApiResponse.success(mealPlanService.toMealRecords(UserContext.requireUserId(), planId, request));
     }
+
+    @GetMapping("/{planId}/shopping-list")
+    public ApiResponse<ShoppingListVO> shoppingList(@PathVariable Long planId) {
+        return ApiResponse.success(mealPlanService.shoppingList(UserContext.requireUserId(), planId));
+    }
 }

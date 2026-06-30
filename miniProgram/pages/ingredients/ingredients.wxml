@@ -7,8 +7,32 @@
   <view wx:if="{{loading}}" class="empty-block">加载中...</view>
   <view wx:elif="{{!items.length}}" class="empty-block">暂无食材</view>
 
-  <view wx:for="{{items}}" wx:key="id" class="list-item">
-    <text class="list-item-title">{{item.name}}</text>
-    <text class="list-item-meta">{{item.caloriePer100g || item.calorie || 0}} kcal/100g · 蛋白 {{item.proteinPer100g || item.protein || 0}}g</text>
+  <view wx:for="{{items}}" wx:key="id" class="list-item item-row">
+    <view class="item-info">
+      <text class="list-item-title">{{item.name}}</text>
+      <text class="list-item-meta">{{item.caloriePer100g || item.calorie || 0}} kcal/100g · 蛋白 {{item.proteinPer100g || item.protein || 0}}g</text>
+    </view>
+    <button
+      class="btn-secondary pair-btn"
+      size="mini"
+      data-id="{{item.id}}"
+      data-name="{{item.name}}"
+      bindtap="onShowPairings"
+    >搭配</button>
+  </view>
+
+  <view wx:if="{{showPairings}}" class="modal-mask" bindtap="onClosePairings">
+    <view class="modal-panel" catchtap="">
+      <text class="title">{{pairingName}} 推荐搭配</text>
+      <view wx:if="{{pairingsLoading}}" class="empty-block">加载中...</view>
+      <view wx:elif="{{!pairings.length}}" class="empty-block">暂无搭配推荐</view>
+      <scroll-view wx:else scroll-y class="modal-scroll">
+        <view wx:for="{{pairings}}" wx:key="ingredientId" class="list-item">
+          <text class="list-item-title">{{item.name}}</text>
+          <text class="list-item-meta">{{item.recommendReason || item.category || ''}} · 共现 {{item.coOccurrenceCount || 0}} 次</text>
+        </view>
+      </scroll-view>
+      <button class="btn-secondary" bindtap="onClosePairings">关闭</button>
+    </view>
   </view>
 </view>

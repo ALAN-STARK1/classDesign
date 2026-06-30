@@ -25,5 +25,9 @@ public class Ingredient {
     private BigDecimal fat;
     private BigDecimal carbohydrate;
     private BigDecimal sodium;
+    @TableField("vitamin_c")
+    private BigDecimal vitaminC;
+    @TableField("vitamin_a")
+    private BigDecimal vitaminA;
     private String status;
 }

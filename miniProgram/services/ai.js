@@ -1,5 +1,6 @@
 const ENDPOINTS = require('../api/endpoints')
-const { get, post, patch, del } = require('../utils/request')
+const { AI_REQUEST_TIMEOUT } = require('../config/index')
+const { get, post, patch, del, upload } = require('../utils/request')
 
 function normalizeAiRecipe(data) {
   if (!data) return data
@@ -9,11 +10,21 @@ function normalizeAiRecipe(data) {
     confidence: data.confidence != null ? data.confidence : (data.suitabilityScore || 0),
     totalCalorie: data.totalCalorie != null ? data.totalCalorie : (nutrition.calories || 0),
     steps: data.steps || data.cookingSteps || [],
+    sourceImageUrl: data.sourceImageUrl || '',
   })
 }
 
 function parseAiRecipeText(payload) {
-  return post(ENDPOINTS.aiRecipes.parse, payload).then(normalizeAiRecipe)
+  return post(ENDPOINTS.aiRecipes.parse, payload, { timeout: AI_REQUEST_TIMEOUT }).then(normalizeAiRecipe)
+}
+
+function parseAiRecipeImage(filePath, prompt) {
+  return upload(
+    ENDPOINTS.aiRecipes.parseImage,
+    filePath,
+    prompt ? { prompt } : {},
+    { timeout: AI_REQUEST_TIMEOUT },
+  ).then(normalizeAiRecipe)
 }
 
 function fetchAiRecipeHistory(params) {
@@ -37,6 +48,7 @@ function deleteAiRecipe(id) {
 
 module.exports = {
   parseAiRecipeText,
+  parseAiRecipeImage,
   fetchAiRecipeHistory,
   fetchAiRecipeDetail,
   confirmAiRecipe,

@@ -40,6 +40,10 @@ function fetchRecipeSuitability(id) {
   return get(ENDPOINTS.recipes.suitability(id))
 }
 
+function fetchIngredientPairings(id, params) {
+  return get(ENDPOINTS.ingredients.pairings(id), params)
+}
+
 module.exports = {
   fetchIngredients,
   fetchRecipes,
@@ -47,4 +51,5 @@ module.exports = {
   favoriteRecipe,
   unfavoriteRecipe,
   fetchRecipeSuitability,
+  fetchIngredientPairings,
 }

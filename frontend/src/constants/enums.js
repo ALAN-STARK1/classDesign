@@ -24,4 +24,5 @@ export const CommunityPostStatus = ['PENDING', 'PUBLISHED', 'REJECTED']
 export const CommonTags = {
   allergens: ['花生', '虾', '蟹', '牛奶', '鸡蛋', '坚果', '小麦', '大豆'],
   restrictions: ['少盐', '少糖', '低脂', '无辣', '素食', '清真', '无乳糖', '控嘌呤'],
+  chronicDiseases: ['高血压', '糖尿病', '高血脂', '痛风'],
 }

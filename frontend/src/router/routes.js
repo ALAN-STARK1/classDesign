@@ -14,6 +14,8 @@ import RegisterView from '../views/auth/RegisterView.vue'
 import HealthProfileView from '../views/health/HealthProfileView.vue'
 import HealthTagsView from '../views/health/HealthTagsView.vue'
 import GoalCyclesView from '../views/health/GoalCyclesView.vue'
+import WeightRecordsView from '../views/health/WeightRecordsView.vue'
+import AiAdvisorView from '../views/ai-advisor/AiAdvisorView.vue'
 import IngredientsView from '../views/recipes/IngredientsView.vue'
 import MealPlansView from '../views/meal-plans/MealPlansView.vue'
 import MealRecordsView from '../views/meal-records/MealRecordsView.vue'
@@ -47,6 +49,7 @@ export const routes = [
       { path: 'health/profile', name: 'health-profile', component: HealthProfileView, meta: { title: '健康档案' } },
       { path: 'health/tags', name: 'health-tags', component: HealthTagsView, meta: { title: '过敏禁忌' } },
       { path: 'health/goals', name: 'health-goals', component: GoalCyclesView, meta: { title: '目标周期' } },
+      { path: 'health/weight-records', name: 'weight-records', component: WeightRecordsView, meta: { title: '体重记录' } },
       { path: 'ingredients', name: 'ingredients', component: IngredientsView, meta: { title: '食材库' } },
       { path: 'recipes', name: 'recipes', component: RecipesView, meta: { title: '菜谱广场' } },
       { path: 'recipes/new', name: 'recipe-create', component: RecipeEditorView, meta: { title: '新建菜谱' } },
@@ -57,6 +60,7 @@ export const routes = [
       { path: 'nutrition', name: 'nutrition', component: NutritionDashboardView, meta: { title: '营养分析' } },
       { path: 'nutrition/reports', name: 'nutrition-reports', component: NutritionReportsView, meta: { title: '营养报告' } },
       { path: 'ai-recipes', name: 'ai-recipes', component: AiRecipesView, meta: { title: 'AI 菜谱' } },
+      { path: 'ai-advisor', name: 'ai-advisor', component: AiAdvisorView, meta: { title: 'AI 营养顾问' } },
       { path: 'community', name: 'community', component: CommunityView, meta: { title: '社区' } },
 
       // Admin routes — only ADMIN role can access

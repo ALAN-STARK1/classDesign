@@ -3,6 +3,17 @@
   <view wx:else class="panel">
     <text class="title">健康档案</text>
 
+    <view wx:if="{{summary}}" class="metric-grid">
+      <view class="metric-card">
+        <text class="metric-label">BMI</text>
+        <text class="metric-value accent">{{summary.bmi || profile.bmi || '--'}}</text>
+      </view>
+      <view class="metric-card">
+        <text class="metric-label">BMI 状态</text>
+        <text class="metric-value">{{summary.bmiStatus || '--'}}</text>
+      </view>
+    </view>
+
     <view class="form-item">
       <text class="form-label">身高 (cm)</text>
       <input class="form-input" type="digit" value="{{profile.heightCm}}" data-field="heightCm" bindinput="onInput" />
@@ -12,8 +23,10 @@
       <input class="form-input" type="digit" value="{{profile.weightKg}}" data-field="weightKg" bindinput="onInput" />
     </view>
     <view class="form-item">
-      <text class="form-label">年龄</text>
-      <input class="form-input" type="number" value="{{profile.age}}" data-field="age" bindinput="onInput" />
+      <text class="form-label">生日</text>
+      <picker mode="date" value="{{profile.birthday}}" bindchange="onBirthdayChange">
+        <view class="form-input">{{profile.birthday || '请选择生日'}}</view>
+      </picker>
     </view>
 
     <view class="form-item">
@@ -40,6 +53,11 @@
     <view class="form-item">
       <text class="form-label">每日热量目标</text>
       <input class="form-input" type="number" value="{{profile.dailyCalorieTarget}}" data-field="dailyCalorieTarget" bindinput="onInput" />
+    </view>
+
+    <view class="link-row">
+      <button class="btn-secondary link-btn" bindtap="goHealthTags">管理健康标签</button>
+      <button class="btn-secondary link-btn" bindtap="goWeightRecords">体重记录</button>
     </view>
 
     <button class="btn-primary" bindtap="onSave">保存档案</button>

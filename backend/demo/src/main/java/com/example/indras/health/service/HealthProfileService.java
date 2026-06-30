@@ -1,6 +1,7 @@
 package com.example.indras.health.service;
 
 import com.example.indras.health.dto.AllergensUpdateRequest;
+import com.example.indras.health.dto.ChronicDiseasesUpdateRequest;
 import com.example.indras.health.dto.HealthProfileSaveRequest;
 import com.example.indras.health.dto.RestrictionsUpdateRequest;
 import com.example.indras.health.vo.HealthProfileSummaryVO;
@@ -19,4 +20,6 @@ public interface HealthProfileService {
     List<String> updateAllergens(Long userId, AllergensUpdateRequest request);
 
     List<String> updateRestrictions(Long userId, RestrictionsUpdateRequest request);
+
+    List<String> updateChronicDiseases(Long userId, ChronicDiseasesUpdateRequest request);
 }

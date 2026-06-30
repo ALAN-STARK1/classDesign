@@ -24,9 +24,14 @@ jwt:
   secret: indras-demo-jwt-secret-key-change-in-production
   expire-seconds: 7200
 
+storage:
+  upload-dir: uploads
+
 ai-service:
   base-url: http://localhost:8000
   internal-token: change-me
+  connect-timeout-ms: 10000
+  read-timeout-ms: 120000
 
 demo-data:
   enabled: true

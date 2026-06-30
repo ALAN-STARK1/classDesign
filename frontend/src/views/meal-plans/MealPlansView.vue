@@ -1,5 +1,5 @@
 <script setup>
-import { Check, EditPen, Refresh, Search, Switch, Tickets } from '@element-plus/icons-vue'
+import { Check, EditPen, Refresh, Search, ShoppingCart, Switch, Tickets } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, reactive, ref } from 'vue'
 import MetricCard from '../../components/common/MetricCard.vue'
@@ -13,6 +13,7 @@ import {
   fetchReplacementCandidates,
   fetchReplaceLogs,
   fetchDayMealPlan,
+  fetchShoppingList,
   generateDayMealPlan,
   replaceMealPlanItem,
   submitPlanItemFeedback,
@@ -31,6 +32,9 @@ const replaceLogs = ref([])
 const feedbackList = ref([])
 const candidates = ref([])
 const candidateDrawer = ref(false)
+const shoppingDrawer = ref(false)
+const shoppingLoading = ref(false)
+const shoppingList = ref(null)
 const feedbackDialog = ref(false)
 const activeItem = ref(null)
 const candidateLoading = ref(false)
@@ -140,6 +144,19 @@ async function submitFeedback() {
   }
 }
 
+async function openShoppingList() {
+  if (!plan.value?.id) return
+  shoppingDrawer.value = true
+  shoppingLoading.value = true
+  try {
+    shoppingList.value = await fetchShoppingList(plan.value.id)
+  } catch (err) {
+    handleRequestError(err)
+  } finally {
+    shoppingLoading.value = false
+  }
+}
+
 async function convertToRecords() {
   try {
     await ElMessageBox.confirm('确认把当前计划的所有餐项生成膳食记录？', '生成记录', { type: 'warning' })
@@ -240,6 +257,7 @@ onMounted(load)
             <el-button class="wide-control" type="primary" :icon="Tickets" :loading="converting" @click="convertToRecords">
               转为记录
             </el-button>
+            <el-button class="wide-control" :icon="ShoppingCart" @click="openShoppingList">采购清单</el-button>
           </article>
 
           <article class="panel">
@@ -292,6 +310,27 @@ onMounted(load)
           </div>
           <el-button type="primary" :icon="Check" @click="replaceWith(candidate)">选择</el-button>
         </article>
+      </div>
+    </el-drawer>
+
+    <el-drawer v-model="shoppingDrawer" title="采购清单" size="460px">
+      <div v-loading="shoppingLoading" class="side-stack">
+        <StateBlock
+          v-if="!shoppingList?.items?.length"
+          title="暂无采购项"
+          description="当前计划未汇总出可采购食材。"
+          :show-action="false"
+        />
+        <template v-else>
+          <p class="muted-copy">计划日期：{{ shoppingList.planDate }}</p>
+          <el-table :data="shoppingList.items" class="dark-table">
+            <el-table-column prop="name" label="食材" min-width="120" />
+            <el-table-column prop="amount" label="用量" width="100">
+              <template #default="{ row }">{{ row.amount }} {{ row.unit }}</template>
+            </el-table-column>
+            <el-table-column prop="category" label="分类" width="100" />
+          </el-table>
+        </template>
       </div>
     </el-drawer>
 

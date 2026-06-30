@@ -1,5 +1,5 @@
 import { ENDPOINTS } from '../../api/endpoints'
-import { request } from '../request/http'
+import { AI_REQUEST_TIMEOUT, request } from '../request/http'
 
 function normalizeAiRecipe(data) {
   if (!data) return data
@@ -15,11 +15,12 @@ function normalizeAiRecipe(data) {
     steps: data.steps || data.cookingSteps || [],
     ingredients: data.ingredients || [],
     warnings: data.warnings || [],
+    sourceImageUrl: data.sourceImageUrl,
   }
 }
 
 export function parseAiRecipeText(payload) {
-  return request.post(ENDPOINTS.aiRecipes.parse, payload).then(normalizeAiRecipe)
+  return request.post(ENDPOINTS.aiRecipes.parse, payload, { timeout: AI_REQUEST_TIMEOUT }).then(normalizeAiRecipe)
 }
 
 export function parseAiRecipeImage(file, prompt = '') {
@@ -29,9 +30,7 @@ export function parseAiRecipeImage(file, prompt = '') {
     formData.append('prompt', prompt)
   }
   return request
-    .post(ENDPOINTS.aiRecipes.parseImage, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    .post(ENDPOINTS.aiRecipes.parseImage, formData, { timeout: AI_REQUEST_TIMEOUT })
     .then(normalizeAiRecipe)
 }
 

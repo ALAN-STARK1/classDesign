@@ -7,6 +7,7 @@ Page({
   data: {
     loading: true,
     profile: {},
+    summary: null,
     genderOptions: Object.keys(GenderLabel),
     genderLabels: Object.values(GenderLabel),
     activityOptions: Object.keys(ActivityLevelLabel),
@@ -25,11 +26,14 @@ Page({
 
   async loadProfile() {
     try {
-      const profile = await healthService.fetchHealthProfile()
+      const [profile, summary] = await Promise.all([
+        healthService.fetchHealthProfile(),
+        healthService.fetchHealthSummary().catch(() => null),
+      ])
       const genderIndex = Math.max(0, this.data.genderOptions.indexOf(profile.gender || 'UNKNOWN'))
       const activityIndex = Math.max(0, this.data.activityOptions.indexOf(profile.activityLevel || 'MODERATE'))
       const goalIndex = Math.max(0, this.data.goalOptions.indexOf(profile.healthGoal || 'MAINTAIN'))
-      this.setData({ profile, genderIndex, activityIndex, goalIndex, loading: false })
+      this.setData({ profile, summary, genderIndex, activityIndex, goalIndex, loading: false })
     } catch (err) {
       showError(err)
       this.setData({ loading: false })
@@ -39,6 +43,10 @@ Page({
   onInput(e) {
     const field = e.currentTarget.dataset.field
     this.setData({ [`profile.${field}`]: e.detail.value })
+  },
+
+  onBirthdayChange(e) {
+    this.setData({ 'profile.birthday': e.detail.value })
   },
 
   onGenderChange(e) {
@@ -56,9 +64,19 @@ Page({
     this.setData({ goalIndex, 'profile.healthGoal': this.data.goalOptions[goalIndex] })
   },
 
+  goHealthTags() {
+    wx.navigateTo({ url: '/pages/health-tags/health-tags' })
+  },
+
+  goWeightRecords() {
+    wx.navigateTo({ url: '/pages/weight-records/weight-records' })
+  },
+
   async onSave() {
     try {
       await healthService.saveHealthProfile(this.data.profile)
+      const summary = await healthService.fetchHealthSummary().catch(() => null)
+      this.setData({ summary })
       wx.showToast({ title: '保存成功', icon: 'success' })
     } catch (err) {
       showError(err)

@@ -10,19 +10,64 @@
       </view>
     </picker>
 
-    <button class="btn-primary" loading="{{generating}}" bindtap="onGenerate">生成当日计划</button>
+    <view class="btn-row">
+      <button class="btn-primary" loading="{{generating}}" bindtap="onGenerate">生成当日计划</button>
+    </view>
+    <view wx:if="{{plan}}" class="btn-row secondary-row">
+      <button class="btn-secondary" bindtap="onShowShopping">采购清单</button>
+      <button class="btn-secondary" loading="{{posterLoading}}" bindtap="onWeekPoster">饮食海报</button>
+    </view>
   </view>
 
   <view wx:if="{{loading}}" class="empty-block">加载中...</view>
   <view wx:elif="{{!items.length}}" class="empty-block">暂无计划，点击上方按钮生成</view>
 
   <view wx:else>
-    <view wx:for="{{items}}" wx:key="id" class="list-item" bindtap="goRecipeDetail" data-id="{{item.recipeId}}">
-      <view class="row">
-        <text class="tag">{{item.mealTypeLabel}}</text>
-        <text class="list-item-title">{{item.recipeName || item.name}}</text>
+    <view wx:for="{{items}}" wx:key="id" class="list-item item-row">
+      <view class="item-main" bindtap="goRecipeDetail" data-id="{{item.recipeId}}">
+        <view class="row">
+          <text class="tag">{{item.mealTypeLabel}}</text>
+          <text class="list-item-title">{{item.recipeName || item.name}}</text>
+        </view>
+        <text class="list-item-meta">{{item.calorie || 0}} kcal · {{item.protein || 0}}g 蛋白</text>
       </view>
-      <text class="list-item-meta">{{item.calorie || 0}} kcal · {{item.protein || 0}}g 蛋白</text>
+      <text class="action-btn" catchtap="onOpenReplace" data-id="{{item.id}}">替换</text>
+    </view>
+  </view>
+
+  <view wx:if="{{showShopping}}" class="modal-mask" bindtap="onCloseShopping">
+    <view class="modal-panel" catchtap="">
+      <text class="title">采购清单</text>
+      <view wx:if="{{shoppingLoading}}" class="empty-block">加载中...</view>
+      <view wx:elif="{{!shoppingList || !shoppingList.items.length}}" class="empty-block">暂无清单项</view>
+      <scroll-view wx:else scroll-y class="modal-scroll">
+        <view wx:for="{{shoppingList.items}}" wx:key="ingredientId" class="list-item">
+          <text class="list-item-title">{{item.name}}</text>
+          <text class="list-item-meta">{{item.amount}} {{item.unit}} · {{item.category || ''}}</text>
+        </view>
+      </scroll-view>
+      <button class="btn-secondary" bindtap="onCloseShopping">关闭</button>
+    </view>
+  </view>
+
+  <view wx:if="{{showReplace}}" class="modal-mask" bindtap="onCloseReplace">
+    <view class="modal-panel" catchtap="">
+      <text class="title">替换 {{replaceItem.recipeName || replaceItem.name}}</text>
+      <view wx:if="{{replaceLoading}}" class="empty-block">加载候选...</view>
+      <view wx:elif="{{!replaceCandidates.length}}" class="empty-block">暂无替换候选</view>
+      <scroll-view wx:else scroll-y class="modal-scroll">
+        <view
+          wx:for="{{replaceCandidates}}"
+          wx:key="recipeId"
+          class="list-item candidate-item"
+          data-recipe-id="{{item.recipeId}}"
+          bindtap="onConfirmReplace"
+        >
+          <text class="list-item-title">{{item.recipeName}}</text>
+          <text class="list-item-meta">{{item.calorie || 0}} kcal · {{item.recommendReason || '推荐替换'}}</text>
+        </view>
+      </scroll-view>
+      <button class="btn-secondary" bindtap="onCloseReplace">取消</button>
     </view>
   </view>
 </view>

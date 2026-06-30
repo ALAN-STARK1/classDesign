@@ -10,6 +10,12 @@ module.exports = {
     summary: '/health-profile/me/summary',
     allergens: '/health-profile/me/allergens',
     restrictions: '/health-profile/me/restrictions',
+    chronicDiseases: '/health-profile/me/chronic-diseases',
+  },
+  weightRecords: {
+    base: '/weight-records',
+    trend: '/weight-records/trend',
+    byId: (id) => `/weight-records/${id}`,
   },
   healthGoalCycles: {
     base: '/health-goal-cycles',
@@ -22,6 +28,7 @@ module.exports = {
   ingredients: {
     base: '/ingredients',
     byId: (id) => `/ingredients/${id}`,
+    pairings: (id) => `/ingredients/${id}/pairings`,
   },
   recipes: {
     base: '/recipes',
@@ -33,8 +40,10 @@ module.exports = {
     generateDay: '/meal-plans/generate/day',
     day: '/meal-plans/day',
     replaceItem: (planId, itemId) => `/meal-plans/${planId}/items/${itemId}/replace`,
+    replacementCandidates: (planId, itemId) => `/meal-plans/${planId}/items/${itemId}/replacement-candidates`,
     feedbackItem: (planId, itemId) => `/meal-plans/${planId}/items/${itemId}/feedback`,
     completion: (planId) => `/meal-plans/${planId}/completion`,
+    shoppingList: (planId) => `/meal-plans/${planId}/shopping-list`,
   },
   mealRecords: {
     base: '/meal-records',
@@ -62,6 +71,11 @@ module.exports = {
     confirm: (id) => `/ai-recipes/${id}/confirm`,
     toRecipe: (id) => `/ai-recipes/${id}/to-recipe`,
     toMealRecord: (id) => `/ai-recipes/${id}/to-meal-record`,
+  },
+  advisor: {
+    chat: '/ai/advisor/chat',
+    todayDiagnosis: '/ai/advisor/today-diagnosis',
+    weekPoster: (planId) => `/ai/advisor/week-poster/${planId}`,
   },
   community: {
     postImages: '/community/post-images',

@@ -12,16 +12,26 @@ import com.example.indras.ingredient.entity.Ingredient;
 import com.example.indras.ingredient.mapper.IngredientMapper;
 import com.example.indras.ingredient.service.IngredientService;
 import com.example.indras.ingredient.vo.IngredientVO;
+import com.example.indras.health.entity.UserAllergen;
+import com.example.indras.health.mapper.UserAllergenMapper;
+import com.example.indras.ingredient.vo.IngredientPairingVO;
+import com.example.indras.recipe.entity.RecipeIngredient;
+import com.example.indras.recipe.mapper.RecipeIngredientMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class IngredientServiceImpl implements IngredientService {
 
     private final IngredientMapper ingredientMapper;
+    private final RecipeIngredientMapper recipeIngredientMapper;
+    private final UserAllergenMapper userAllergenMapper;
 
     @Override
     public PageResult<IngredientVO> page(PageQuery query, String category) {
@@ -66,6 +76,56 @@ public class IngredientServiceImpl implements IngredientService {
         return toVo(ingredient);
     }
 
+    @Override
+    public List<IngredientPairingVO> pairings(Long userId, Long ingredientId, int limit) {
+        Ingredient base = requireIngredient(ingredientId);
+        Set<String> allergens = userAllergenMapper.selectList(Wrappers.<UserAllergen>lambdaQuery()
+                        .eq(UserAllergen::getUserId, userId)).stream()
+                .map(UserAllergen::getAllergenName).collect(Collectors.toSet());
+
+        List<RecipeIngredient> sourceRows = recipeIngredientMapper.selectList(Wrappers.<RecipeIngredient>lambdaQuery()
+                .eq(RecipeIngredient::getIngredientId, ingredientId));
+        Set<Long> recipeIds = sourceRows.stream().map(RecipeIngredient::getRecipeId).collect(Collectors.toSet());
+        if (recipeIds.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, Integer> counts = new HashMap<>();
+        for (Long recipeId : recipeIds) {
+            List<RecipeIngredient> rows = recipeIngredientMapper.selectList(Wrappers.<RecipeIngredient>lambdaQuery()
+                    .eq(RecipeIngredient::getRecipeId, recipeId));
+            for (RecipeIngredient row : rows) {
+                if (!row.getIngredientId().equals(ingredientId)) {
+                    counts.merge(row.getIngredientId(), 1, Integer::sum);
+                }
+            }
+        }
+
+        return counts.entrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+                .limit(Math.max(limit, 1))
+                .map(entry -> {
+                    Ingredient other = ingredientMapper.selectById(entry.getKey());
+                    if (other == null || UserStatus.DISABLED.name().equals(other.getStatus())) {
+                        return null;
+                    }
+                    if (allergens.stream().anyMatch(a -> other.getName().contains(a))) {
+                        return null;
+                    }
+                    return IngredientPairingVO.builder()
+                            .ingredientId(other.getId())
+                            .name(other.getName())
+                            .category(other.getCategory())
+                            .coOccurrenceCount(entry.getValue())
+                            .recommendReason("与" + base.getName() + "在 " + entry.getValue() + " 道菜谱中共现，营养互补")
+                            .calorie(other.getCalorie())
+                            .protein(other.getProtein())
+                            .build();
+                })
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
     private Ingredient requireIngredient(Long id) {
         Ingredient ingredient = ingredientMapper.selectById(id);
         if (ingredient == null) {
@@ -84,6 +144,8 @@ public class IngredientServiceImpl implements IngredientService {
                 .fat(request.getFat())
                 .carbohydrate(request.getCarbohydrate())
                 .sodium(request.getSodium())
+                .vitaminC(request.getVitaminC())
+                .vitaminA(request.getVitaminA())
                 .build();
     }
 
@@ -98,6 +160,8 @@ public class IngredientServiceImpl implements IngredientService {
         ingredient.setFat(request.getFat());
         ingredient.setCarbohydrate(request.getCarbohydrate());
         ingredient.setSodium(request.getSodium());
+        ingredient.setVitaminC(request.getVitaminC());
+        ingredient.setVitaminA(request.getVitaminA());
         if (request.getStatus() != null) {
             ingredient.setStatus(request.getStatus());
         }
@@ -114,6 +178,8 @@ public class IngredientServiceImpl implements IngredientService {
                 .fat(ingredient.getFat())
                 .carbohydrate(ingredient.getCarbohydrate())
                 .sodium(ingredient.getSodium())
+                .vitaminC(ingredient.getVitaminC())
+                .vitaminA(ingredient.getVitaminA())
                 .status(ingredient.getStatus())
                 .build();
     }

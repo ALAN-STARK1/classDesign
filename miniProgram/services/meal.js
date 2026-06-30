@@ -67,6 +67,22 @@ function deleteMealRecord(id) {
   return del(ENDPOINTS.mealRecords.byId(id))
 }
 
+function fetchPlanShoppingList(planId) {
+  return get(ENDPOINTS.mealPlans.shoppingList(planId))
+}
+
+function fetchReplacementCandidates(planId, itemId, params) {
+  return get(ENDPOINTS.mealPlans.replacementCandidates(planId, itemId), params)
+}
+
+function replacePlanItem(planId, itemId, payload) {
+  return patch(ENDPOINTS.mealPlans.replaceItem(planId, itemId), {
+    newRecipeId: payload.newRecipeId,
+    replaceReason: payload.replaceReason,
+    remark: payload.remark,
+  })
+}
+
 module.exports = {
   generateDayMealPlan,
   fetchDayMealPlan,
@@ -75,4 +91,7 @@ module.exports = {
   createMealRecordFromRecipe,
   fetchDayMealRecords,
   deleteMealRecord,
+  fetchPlanShoppingList,
+  fetchReplacementCandidates,
+  replacePlanItem,
 }

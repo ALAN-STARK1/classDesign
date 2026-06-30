@@ -23,4 +23,5 @@ public class HealthProfileVO {
     private Integer dailyCalorieTarget;
     private List<String> allergens;
     private List<String> restrictions;
+    private List<String> chronicDiseases;
 }

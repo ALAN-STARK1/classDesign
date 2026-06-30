@@ -18,11 +18,24 @@ miniProgram/
 ## 启动步骤
 
 1. 启动 MySQL，导入 `backend/demo` 的 schema/data
-2. 启动后端：`cd backend/demo && mvn spring-boot:run`（端口 8080）
-3. 可选：启动 AI 服务（端口 8000，AI 菜谱解析需要）
-4. 用微信开发者工具打开 `miniProgram/` 目录
-5. 勾选 **详情 → 本地设置 → 不校验合法域名**
-6. 演示账号：`alice` / `user123`
+2. **若库已存在**，额外执行 `backend/demo/src/main/resources/migration-v2.sql`（慢性病表、维生素字段）
+3. 启动后端：`cd backend/demo && mvn spring-boot:run`（端口 8080，需 JDK 21）
+4. 启动 AI 服务（AI 菜谱解析 + 营养顾问需要）：
+   ```bash
+   cd ai-service
+   venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+   ```
+5. 用微信开发者工具打开 `miniProgram/` 目录
+6. 勾选 **详情 → 本地设置 → 不校验合法域名**
+7. 演示账号：`alice` / `user123`
+
+## 自测脚本
+
+后端与 ai-service 启动后：
+
+```bash
+python scripts/smoke_test_api.py
+```
 
 ## 真机调试
 
@@ -39,7 +52,10 @@ const API_BASE_URL = 'http://192.168.1.100:8080/api/v1'
 | 概览 | 今日营养、目标周期、风险预警 |
 | 计划 | 生成/查看每日膳食计划 |
 | 菜谱 | 搜索浏览菜谱 |
-| 我的 | 健康档案、记录、营养、AI、社区等入口 |
+| 我的 | 健康档案、健康标签、体重记录、记录、营养、AI顾问、社区等入口 |
+| AI顾问 | 自然语言营养咨询、今日诊断 |
+| 体重 | 录入、趋势折线图 |
+| 计划 | 采购清单、替换菜品、饮食海报 |
 
 ## 接口契约
 

@@ -69,6 +69,13 @@ CREATE TABLE IF NOT EXISTS user_diet_restriction (
     UNIQUE (user_id, restriction_name)
 );
 
+CREATE TABLE IF NOT EXISTS user_chronic_disease (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id       BIGINT       NOT NULL,
+    disease_name  VARCHAR(100) NOT NULL,
+    UNIQUE (user_id, disease_name)
+);
+
 CREATE TABLE IF NOT EXISTS weight_record (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id         BIGINT        NOT NULL,
@@ -102,6 +109,8 @@ CREATE TABLE IF NOT EXISTS ingredient (
     fat             DECIMAL(8,2) NOT NULL DEFAULT 0,
     carbohydrate    DECIMAL(8,2) NOT NULL DEFAULT 0,
     sodium          DECIMAL(8,2) NOT NULL DEFAULT 0,
+    vitamin_c       DECIMAL(8,2) NOT NULL DEFAULT 0,
+    vitamin_a       DECIMAL(8,2) NOT NULL DEFAULT 0,
     status          VARCHAR(20)  NOT NULL DEFAULT 'ENABLED'
 );
 

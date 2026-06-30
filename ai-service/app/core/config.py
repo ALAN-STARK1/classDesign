@@ -15,8 +15,8 @@ class Settings:
     device: str = "cpu"
     deepseek_api_key: str = ""
     deepseek_base_url: str = "https://api.deepseek.com"
-    deepseek_model: str = "deepseek-v4-flash"
-    deepseek_timeout: float = 60.0
+    deepseek_model: str = "deepseek-chat"
+    deepseek_timeout: float = 120.0
     max_image_bytes: int = 10 * 1024 * 1024
 
     @property
@@ -39,7 +39,7 @@ def get_settings() -> Settings:
         device=os.getenv("DEVICE", "cpu"),
         deepseek_api_key=os.getenv("DEEPSEEK_API_KEY", ""),
         deepseek_base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/"),
-        deepseek_model=os.getenv("DEEPSEEK_MODEL", "deepseek-v4-flash"),
-        deepseek_timeout=float(os.getenv("DEEPSEEK_TIMEOUT", "60")),
+        deepseek_model=os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
+        deepseek_timeout=float(os.getenv("DEEPSEEK_TIMEOUT", "120")),
         max_image_bytes=int(os.getenv("MAX_IMAGE_BYTES", str(10 * 1024 * 1024))),
     )

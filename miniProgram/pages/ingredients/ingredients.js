@@ -6,6 +6,10 @@ Page({
     keyword: '',
     loading: true,
     items: [],
+    showPairings: false,
+    pairingsLoading: false,
+    pairings: [],
+    pairingName: '',
   },
 
   onShow() {
@@ -34,5 +38,27 @@ Page({
       showError(err)
       this.setData({ loading: false })
     }
+  },
+
+  async onShowPairings(e) {
+    const id = e.currentTarget.dataset.id
+    const name = e.currentTarget.dataset.name
+    this.setData({
+      showPairings: true,
+      pairingsLoading: true,
+      pairings: [],
+      pairingName: name,
+    })
+    try {
+      const pairings = await recipeService.fetchIngredientPairings(id, { limit: 10 })
+      this.setData({ pairings: pairings || [], pairingsLoading: false })
+    } catch (err) {
+      showError(err)
+      this.setData({ pairingsLoading: false })
+    }
+  },
+
+  onClosePairings() {
+    this.setData({ showPairings: false })
   },
 })

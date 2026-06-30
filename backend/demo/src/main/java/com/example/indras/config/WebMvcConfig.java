@@ -1,9 +1,11 @@
 package com.example.indras.config;
 
+import com.example.indras.common.storage.LocalFileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -11,6 +13,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final JwtAuthInterceptor jwtAuthInterceptor;
+    private final LocalFileStorageService localFileStorageService;
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        String location = localFileStorageService.getUploadRoot().toUri().toString();
+        if (!location.endsWith("/")) {
+            location = location + "/";
+        }
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations(location);
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

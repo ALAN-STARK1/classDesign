@@ -49,4 +49,9 @@ Page({
       this.setData({ generating: false })
     }
   },
+
+  goDetail(e) {
+    const id = e.currentTarget.dataset.id
+    if (id) wx.navigateTo({ url: `/pages/nutrition-report-detail/nutrition-report-detail?id=${id}` })
+  },
 })

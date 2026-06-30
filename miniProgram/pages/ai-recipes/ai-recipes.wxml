@@ -3,7 +3,10 @@
     <text class="eyebrow">AI RECIPE</text>
     <text class="title">文本解析菜谱</text>
     <textarea class="textarea" placeholder="粘贴或输入菜谱文本..." value="{{text}}" bindinput="onTextInput" />
-    <button class="btn-primary" loading="{{parsing}}" bindtap="onParse">开始解析</button>
+    <view class="btn-row">
+      <button class="btn-primary" loading="{{parsing}}" bindtap="onParse">文本解析</button>
+      <button class="btn-secondary" loading="{{imageParsing}}" bindtap="onChooseImage">图片解析</button>
+    </view>
   </view>
 
   <view class="panel">

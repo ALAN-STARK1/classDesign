@@ -18,5 +18,7 @@ public class IngredientVO {
     private BigDecimal fat;
     private BigDecimal carbohydrate;
     private BigDecimal sodium;
+    private BigDecimal vitaminC;
+    private BigDecimal vitaminA;
     private String status;
 }

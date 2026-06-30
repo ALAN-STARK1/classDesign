@@ -9,6 +9,7 @@ import {
   createIngredient,
   disableIngredient,
   fetchIngredientDetail,
+  fetchIngredientPairings,
   fetchIngredients,
   updateIngredient,
 } from '../../services/modules/recipe.service'
@@ -19,6 +20,8 @@ const saving = ref(false)
 const error = ref('')
 const ingredients = ref([])
 const detail = ref(null)
+const pairings = ref([])
+const pairingsLoading = ref(false)
 const detailVisible = ref(false)
 const dialogVisible = ref(false)
 const editingId = ref(null)
@@ -101,8 +104,12 @@ async function openDetail(row) {
   try {
     detail.value = await fetchIngredientDetail(row.id)
     detailVisible.value = true
+    pairingsLoading.value = true
+    pairings.value = await fetchIngredientPairings(row.id).catch(() => [])
   } catch (err) {
     handleRequestError(err)
+  } finally {
+    pairingsLoading.value = false
   }
 }
 
@@ -232,6 +239,31 @@ onMounted(load)
           <el-tag v-if="!detail.allergens?.length">无常见过敏源</el-tag>
         </div>
         <p class="muted-copy">{{ detail.description }}</p>
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">PAIRINGS</span>
+            <h3>常见搭配</h3>
+          </div>
+        </div>
+        <div v-loading="pairingsLoading" class="side-stack">
+          <StateBlock
+            v-if="!pairings.length"
+            title="暂无搭配推荐"
+            description="该食材尚未有足够共现数据。"
+            :show-action="false"
+          />
+          <article v-for="item in pairings" :key="item.ingredientId" class="candidate-card">
+            <div>
+              <strong>{{ item.name }}</strong>
+              <p>{{ item.recommendReason || `共现 ${item.coOccurrenceCount || 0} 次` }}</p>
+            </div>
+            <div class="nutrition-strip">
+              <span>{{ Math.round(item.calorie || 0) }} kcal</span>
+              <span>蛋白 {{ item.protein || 0 }}g</span>
+            </div>
+          </article>
+        </div>
       </div>
     </el-drawer>
 

@@ -2,6 +2,7 @@
 import {
   Aim,
   ChatDotRound,
+  Comment,
   DataAnalysis,
   Dish,
   Document,
@@ -15,6 +16,7 @@ import {
   Switch,
   SwitchButton,
   Tickets,
+  TrendCharts,
   User,
   Warning,
 } from '@element-plus/icons-vue'
@@ -31,6 +33,7 @@ const navItems = [
   { label: '健康档案', path: '/health/profile', icon: User },
   { label: '过敏禁忌', path: '/health/tags', icon: Warning },
   { label: '目标周期', path: '/health/goals', icon: Aim },
+  { label: '体重记录', path: '/health/weight-records', icon: TrendCharts },
   { label: '食材库', path: '/ingredients', icon: Goods },
   { label: '菜谱广场', path: '/recipes', icon: Dish },
   { label: '膳食计划', path: '/meal-plans', icon: Tickets },
@@ -38,6 +41,7 @@ const navItems = [
   { label: '营养分析', path: '/nutrition', icon: DataAnalysis },
   { label: '营养报告', path: '/nutrition/reports', icon: Document },
   { label: 'AI 菜谱', path: '/ai-recipes', icon: MagicStick },
+  { label: 'AI 营养顾问', path: '/ai-advisor', icon: Comment },
   { label: '社区', path: '/community', icon: ChatDotRound },
 ]
 

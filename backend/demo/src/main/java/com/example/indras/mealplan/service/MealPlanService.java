@@ -29,4 +29,6 @@ public interface MealPlanService {
     MealPlanCompletionVO completion(Long userId, Long planId);
 
     CountResultVO toMealRecords(Long userId, Long planId, MealPlanToRecordsRequest request);
+
+    ShoppingListVO shoppingList(Long userId, Long planId);
 }

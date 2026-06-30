@@ -8,3 +8,16 @@
   margin-bottom: 16rpx;
   box-sizing: border-box;
 }
+
+.btn-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.btn-row button {
+  flex: 1;
+}
+
+.btn-row button::after {
+  border: none;
+}

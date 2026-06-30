@@ -1,10 +1,13 @@
 const aiService = require('../../services/ai')
 const { showError } = require('../../utils/request')
 
+const PREVIEW_KEY = 'ai_recipe_local_preview'
+
 Page({
   data: {
     text: '',
     parsing: false,
+    imageParsing: false,
     loading: true,
     history: [],
   },
@@ -33,6 +36,32 @@ Page({
       showError(err)
     } finally {
       this.setData({ parsing: false })
+    }
+  },
+
+  onChooseImage() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const filePath = res.tempFiles[0].tempFilePath
+        this.uploadImage(filePath)
+      },
+    })
+  },
+
+  async uploadImage(filePath) {
+    this.setData({ imageParsing: true })
+    try {
+      const result = await aiService.parseAiRecipeImage(filePath)
+      wx.setStorageSync(PREVIEW_KEY, { id: result.id, filePath })
+      wx.navigateTo({ url: `/pages/ai-recipe-detail/ai-recipe-detail?id=${result.id}` })
+      this.loadHistory()
+    } catch (err) {
+      showError(err)
+    } finally {
+      this.setData({ imageParsing: false })
     }
   },
 

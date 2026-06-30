@@ -6,6 +6,9 @@ import com.example.indras.common.enums.Gender;
 import com.example.indras.common.enums.HealthGoal;
 import com.example.indras.common.util.HealthCalculator;
 import com.example.indras.health.dto.AllergensUpdateRequest;
+import com.example.indras.health.dto.ChronicDiseasesUpdateRequest;
+import com.example.indras.health.entity.UserChronicDisease;
+import com.example.indras.health.mapper.UserChronicDiseaseMapper;
 import com.example.indras.health.dto.HealthProfileSaveRequest;
 import com.example.indras.health.dto.RestrictionsUpdateRequest;
 import com.example.indras.health.entity.HealthProfile;
@@ -31,6 +34,7 @@ public class HealthProfileServiceImpl implements HealthProfileService {
     private final HealthProfileMapper healthProfileMapper;
     private final UserAllergenMapper userAllergenMapper;
     private final UserDietRestrictionMapper userDietRestrictionMapper;
+    private final UserChronicDiseaseMapper userChronicDiseaseMapper;
 
     @Override
     public HealthProfileVO getMyProfile(Long userId) {
@@ -40,6 +44,7 @@ public class HealthProfileServiceImpl implements HealthProfileService {
             return HealthProfileVO.builder()
                     .allergens(listAllergens(userId))
                     .restrictions(listRestrictions(userId))
+                    .chronicDiseases(listChronicDiseases(userId))
                     .build();
         }
         return toVo(profile, userId);
@@ -121,6 +126,16 @@ public class HealthProfileServiceImpl implements HealthProfileService {
         return request.getRestrictions();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<String> updateChronicDiseases(Long userId, ChronicDiseasesUpdateRequest request) {
+        userChronicDiseaseMapper.delete(Wrappers.<UserChronicDisease>lambdaQuery().eq(UserChronicDisease::getUserId, userId));
+        for (String disease : request.getChronicDiseases()) {
+            userChronicDiseaseMapper.insert(UserChronicDisease.builder().userId(userId).diseaseName(disease).build());
+        }
+        return request.getChronicDiseases();
+    }
+
     private HealthProfileVO toVo(HealthProfile profile, Long userId) {
         return HealthProfileVO.builder()
                 .id(profile.getId())
@@ -135,6 +150,7 @@ public class HealthProfileServiceImpl implements HealthProfileService {
                 .dailyCalorieTarget(profile.getDailyCalorieTarget())
                 .allergens(listAllergens(userId))
                 .restrictions(listRestrictions(userId))
+                .chronicDiseases(listChronicDiseases(userId))
                 .build();
     }
 
@@ -146,5 +162,10 @@ public class HealthProfileServiceImpl implements HealthProfileService {
     private List<String> listRestrictions(Long userId) {
         return userDietRestrictionMapper.selectList(Wrappers.<UserDietRestriction>lambdaQuery().eq(UserDietRestriction::getUserId, userId))
                 .stream().map(UserDietRestriction::getRestrictionName).toList();
+    }
+
+    private List<String> listChronicDiseases(Long userId) {
+        return userChronicDiseaseMapper.selectList(Wrappers.<UserChronicDisease>lambdaQuery().eq(UserChronicDisease::getUserId, userId))
+                .stream().map(UserChronicDisease::getDiseaseName).toList();
     }
 }

@@ -52,6 +52,10 @@ export function disableIngredient(id) {
   return request.patch(ENDPOINTS.ingredients.disable(id))
 }
 
+export function fetchIngredientPairings(id, params) {
+  return request.get(ENDPOINTS.ingredients.pairings(id), { params })
+}
+
 export function fetchRecipes(params) {
   return request.get(ENDPOINTS.recipes.base, { params })
 }

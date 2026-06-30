@@ -15,3 +15,53 @@
 .search-btn::after {
   border: none;
 }
+
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.pair-btn {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  padding: 0 20rpx;
+}
+
+.pair-btn::after {
+  border: none;
+}
+
+.modal-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  z-index: 100;
+}
+
+.modal-panel {
+  width: 100%;
+  max-height: 70vh;
+  background: #181818;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 32rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.modal-scroll {
+  max-height: 45vh;
+  margin: 16rpx 0;
+}
+
+.modal-panel .btn-secondary::after {
+  border: none;
+}
