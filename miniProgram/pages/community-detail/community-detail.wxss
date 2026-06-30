@@ -1,0 +1,21 @@
+.content {
+  display: block;
+  margin: 24rpx 0;
+  line-height: 1.6;
+  color: #e5e5e5;
+}
+
+.actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.mini-btn,
+.action-btn {
+  margin-top: 16rpx;
+}
+
+.mini-btn::after,
+.action-btn::after {
+  border: none;
+}

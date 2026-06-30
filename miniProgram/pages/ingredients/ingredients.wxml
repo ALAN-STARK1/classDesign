@@ -1,0 +1,14 @@
+<view class="container">
+  <view class="panel search-bar">
+    <input class="form-input" placeholder="搜索食材" value="{{keyword}}" bindinput="onKeywordInput" bindconfirm="onSearch" />
+    <button class="btn-primary search-btn" bindtap="onSearch">搜索</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <view wx:elif="{{!items.length}}" class="empty-block">暂无食材</view>
+
+  <view wx:for="{{items}}" wx:key="id" class="list-item">
+    <text class="list-item-title">{{item.name}}</text>
+    <text class="list-item-meta">{{item.caloriePer100g || item.calorie || 0}} kcal/100g · 蛋白 {{item.proteinPer100g || item.protein || 0}}g</text>
+  </view>
+</view>

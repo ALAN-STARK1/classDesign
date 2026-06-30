@@ -1,0 +1,30 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <block wx:else>
+    <view class="panel">
+      <text class="title">{{recipe.name}}</text>
+      <text class="subtitle">置信度 {{recipe.confidence || 0}} · {{recipe.totalCalorie || 0}} kcal</text>
+      <text class="list-item-meta">状态：{{recipe.status || 'PARSED'}}</text>
+    </view>
+
+    <view class="panel" wx:if="{{recipe.ingredients && recipe.ingredients.length}}">
+      <text class="title">食材</text>
+      <view wx:for="{{recipe.ingredients}}" wx:key="index" class="list-item">
+        <text class="list-item-title">{{item.name || item.ingredientName}}</text>
+        <text class="list-item-meta">{{item.amount}}{{item.unit}}</text>
+      </view>
+    </view>
+
+    <view class="panel" wx:if="{{recipe.steps && recipe.steps.length}}">
+      <text class="title">步骤</text>
+      <view wx:for="{{recipe.steps}}" wx:key="index" class="list-item">
+        <text class="list-item-meta">{{item.description || item.content || item}}</text>
+      </view>
+    </view>
+
+    <view class="panel">
+      <button class="btn-primary action-btn" bindtap="onConfirm">确认菜谱</button>
+      <button class="btn-secondary action-btn" bindtap="onDelete">删除</button>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,19 @@
+.search-bar {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.search-bar .form-input {
+  flex: 1;
+}
+
+.search-btn {
+  width: 140rpx;
+  padding: 0;
+  font-size: 26rpx;
+}
+
+.search-btn::after {
+  border: none;
+}

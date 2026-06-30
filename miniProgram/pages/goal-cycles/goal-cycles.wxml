@@ -1,0 +1,20 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <block wx:else>
+    <view wx:if="{{current}}" class="panel">
+      <text class="eyebrow">CURRENT</text>
+      <text class="title">{{current.goalLabel}}</text>
+      <text class="subtitle">{{current.startDate}} ~ {{current.endDate}} · {{current.statusLabel}}</text>
+      <text class="list-item-meta">目标热量 {{current.targetCalorie || '-'}} kcal</text>
+    </view>
+
+    <view class="panel">
+      <text class="title">历史周期</text>
+      <view wx:if="{{!cycles.length}}" class="empty-block">暂无记录</view>
+      <view wx:for="{{cycles}}" wx:key="id" class="list-item">
+        <text class="list-item-title">{{item.goalLabel}}</text>
+        <text class="list-item-meta">{{item.startDate}} ~ {{item.endDate}} · {{item.statusLabel}}</text>
+      </view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,15 @@
+<view class="container">
+  <view class="panel user-card">
+    <text class="eyebrow">PROFILE</text>
+    <text class="title">{{user.username || '用户'}}</text>
+    <text class="subtitle">@{{user.username || 'guest'}}</text>
+  </view>
+
+  <view class="menu-grid">
+    <view wx:for="{{menus}}" wx:key="url" class="menu-item" bindtap="goPage" data-url="{{item.url}}">
+      <text>{{item.title}}</text>
+    </view>
+  </view>
+
+  <button class="btn-secondary logout-btn" bindtap="onLogout">退出登录</button>
+</view>

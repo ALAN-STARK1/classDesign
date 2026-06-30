@@ -1,0 +1,46 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <block wx:else>
+    <view class="panel">
+      <text class="title">{{recipe.name}}</text>
+      <text class="subtitle">{{recipe.description || '暂无描述'}}</text>
+      <view class="metric-grid">
+        <view class="metric-card">
+          <text class="metric-label">热量</text>
+          <text class="metric-value accent">{{recipe.totalCalorie || 0}}</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-label">蛋白质</text>
+          <text class="metric-value">{{recipe.totalProtein || 0}}g</text>
+        </view>
+      </view>
+      <view wx:if="{{suitability}}">
+        <text class="tag">适配分 {{suitability.score || suitability.suitabilityScore || 0}}</text>
+      </view>
+    </view>
+
+    <view class="panel" wx:if="{{recipe.ingredients && recipe.ingredients.length}}">
+      <text class="title">食材</text>
+      <view wx:for="{{recipe.ingredients}}" wx:key="id" class="list-item">
+        <text class="list-item-title">{{item.ingredientName || item.name}}</text>
+        <text class="list-item-meta">{{item.amount}}{{item.unit}}</text>
+      </view>
+    </view>
+
+    <view class="panel" wx:if="{{recipe.steps && recipe.steps.length}}">
+      <text class="title">步骤</text>
+      <view wx:for="{{recipe.steps}}" wx:key="stepNo" class="list-item">
+        <text class="list-item-title">步骤 {{item.stepNo || index + 1}}</text>
+        <text class="list-item-meta">{{item.description || item.content}}</text>
+      </view>
+    </view>
+
+    <view class="panel">
+      <picker range="{{mealTypes}}" range-key="" value="{{mealTypeIndex}}" bindchange="onMealTypeChange">
+        <view class="form-input">餐次：{{MealTypeLabel[mealTypes[mealTypeIndex]]}}</view>
+      </picker>
+      <button class="btn-primary action-btn" bindtap="onRecordMeal">记入今日膳食</button>
+      <button class="btn-secondary action-btn" bindtap="onFavorite">{{recipe.favorited ? '取消收藏' : '收藏菜谱'}}</button>
+    </view>
+  </block>
+</view>

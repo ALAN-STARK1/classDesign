@@ -1,0 +1,23 @@
+.login-page {
+  padding-top: 120rpx;
+}
+
+.hero {
+  margin-bottom: 48rpx;
+}
+
+.link-btn {
+  margin-top: 24rpx;
+  background: transparent;
+  color: #1ed760;
+  font-size: 26rpx;
+}
+
+.link-btn::after {
+  border: none;
+}
+
+.btn-primary::after,
+.btn-secondary::after {
+  border: none;
+}

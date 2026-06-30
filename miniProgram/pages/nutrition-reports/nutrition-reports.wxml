@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="panel">
+    <text class="title">营养报告</text>
+    <view class="btn-row">
+      <button class="btn-primary" loading="{{generating}}" bindtap="onGenerateWeekly">生成周报</button>
+      <button class="btn-secondary" loading="{{generating}}" bindtap="onGenerateMonthly">生成月报</button>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <view wx:elif="{{!reports.length}}" class="empty-block">暂无报告</view>
+
+  <view wx:for="{{reports}}" wx:key="id" class="list-item">
+    <text class="list-item-title">{{item.reportType || '营养报告'}}</text>
+    <text class="list-item-meta">{{item.startDate}} ~ {{item.endDate || item.reportMonth}}</text>
+    <text class="list-item-meta">平均热量 {{item.avgCalorie || item.totalCalorie || 0}} kcal</text>
+  </view>
+</view>

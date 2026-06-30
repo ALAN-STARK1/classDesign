@@ -1,0 +1,11 @@
+.user-card {
+  margin-bottom: 32rpx;
+}
+
+.logout-btn {
+  margin-top: 48rpx;
+}
+
+.logout-btn::after {
+  border: none;
+}

@@ -1,0 +1,15 @@
+<view class="container">
+  <view class="panel">
+    <text class="eyebrow">COMMUNITY</text>
+    <text class="title">健康膳食社区</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <view wx:elif="{{!posts.length}}" class="empty-block">暂无帖子</view>
+
+  <view wx:for="{{posts}}" wx:key="id" class="list-item" bindtap="goDetail" data-id="{{item.id}}">
+    <text class="list-item-title">{{item.title}}</text>
+    <text class="list-item-meta">{{item.authorName || item.username}} · 👍 {{item.likeCount || 0}} · 💬 {{item.commentCount || 0}}</text>
+    <text class="list-item-meta">{{item.content}}</text>
+  </view>
+</view>

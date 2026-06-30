@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="panel">
+    <text class="eyebrow">AI RECIPE</text>
+    <text class="title">文本解析菜谱</text>
+    <textarea class="textarea" placeholder="粘贴或输入菜谱文本..." value="{{text}}" bindinput="onTextInput" />
+    <button class="btn-primary" loading="{{parsing}}" bindtap="onParse">开始解析</button>
+  </view>
+
+  <view class="panel">
+    <text class="title">解析历史</text>
+    <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+    <view wx:elif="{{!history.length}}" class="empty-block">暂无历史</view>
+    <view wx:for="{{history}}" wx:key="id" class="list-item" bindtap="goDetail" data-id="{{item.id}}">
+      <text class="list-item-title">{{item.name || item.recipeName || '未命名菜谱'}}</text>
+      <text class="list-item-meta">{{item.totalCalorie || 0}} kcal · 置信度 {{item.confidence || 0}}</text>
+    </view>
+  </view>
+</view>

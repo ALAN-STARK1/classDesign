@@ -1,0 +1,53 @@
+<view class="container">
+  <view class="panel">
+    <text class="eyebrow">NUTRITION</text>
+    <text class="title">营养分析</text>
+    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+      <view class="form-input">{{date}}</view>
+    </picker>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <block wx:else>
+    <view class="panel">
+      <view class="metric-grid">
+        <view class="metric-card">
+          <text class="metric-label">摄入热量</text>
+          <text class="metric-value accent">{{summary.calorie || 0}}</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-label">目标热量</text>
+          <text class="metric-value">{{summary.targetCalorie || 1600}}</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-label">蛋白质</text>
+          <text class="metric-value">{{summary.protein || 0}}g</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-label">脂肪</text>
+          <text class="metric-value">{{summary.fat || 0}}g</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel">
+      <text class="title">营养缺口</text>
+      <view wx:if="{{!gaps.length}}" class="empty-block">暂无缺口数据</view>
+      <view wx:for="{{gaps}}" wx:key="nutrient" class="list-item">
+        <text class="list-item-title">{{item.label || item.nutrient}}</text>
+        <text class="list-item-meta">缺口 {{item.gap}} · {{item.suggestion}}</text>
+      </view>
+    </view>
+
+    <view class="panel">
+      <text class="title">风险预警</text>
+      <view wx:if="{{!risks.length}}" class="empty-block">暂无风险</view>
+      <view wx:for="{{risks}}" wx:key="id" class="risk-card {{item.severity}}">
+        <text class="list-item-title">{{item.title}}</text>
+        <text class="list-item-meta">{{item.description}}</text>
+      </view>
+    </view>
+
+    <button class="btn-primary" bindtap="goReports">查看营养报告</button>
+  </block>
+</view>

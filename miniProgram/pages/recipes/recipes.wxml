@@ -1,0 +1,17 @@
+<view class="container">
+  <view class="panel search-bar">
+    <input class="form-input" placeholder="搜索菜谱" value="{{keyword}}" bindinput="onKeywordInput" confirm-type="search" bindconfirm="onSearch" />
+    <button class="btn-primary search-btn" bindtap="onSearch">搜索</button>
+  </view>
+
+  <view wx:if="{{loading && !items.length}}" class="empty-block">加载中...</view>
+  <view wx:elif="{{!items.length}}" class="empty-block">暂无菜谱</view>
+
+  <view wx:for="{{items}}" wx:key="id" class="list-item" bindtap="goDetail" data-id="{{item.id}}">
+    <text class="list-item-title">{{item.name}}</text>
+    <text class="list-item-meta">{{item.totalCalorie || item.calorie || 0}} kcal · {{item.cuisineType || '家常菜'}}</text>
+    <view wx:if="{{item.tags && item.tags.length}}">
+      <text wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag" class="tag">{{tag}}</text>
+    </view>
+  </view>
+</view>

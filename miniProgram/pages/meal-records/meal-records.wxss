@@ -1,0 +1,15 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.action-btn,
+.mini-btn {
+  margin-top: 16rpx;
+}
+
+.action-btn::after,
+.mini-btn::after {
+  border: none;
+}

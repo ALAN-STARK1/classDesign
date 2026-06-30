@@ -1,0 +1,47 @@
+<view class="container">
+  <view class="panel">
+    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+      <view class="list-item">
+        <text class="list-item-title">日期</text>
+        <text class="list-item-meta">{{date}}</text>
+      </view>
+    </picker>
+    <button class="btn-primary" bindtap="toggleForm">{{showForm ? '取消添加' : '手动添加记录'}}</button>
+  </view>
+
+  <view wx:if="{{showForm}}" class="panel">
+    <view class="form-item">
+      <text class="form-label">食物名称</text>
+      <input class="form-input" value="{{form.foodName}}" data-field="foodName" bindinput="onFormInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">份量</text>
+      <input class="form-input" type="digit" value="{{form.amount}}" data-field="amount" bindinput="onFormInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">热量 (kcal)</text>
+      <input class="form-input" type="number" value="{{form.calorie}}" data-field="calorie" bindinput="onFormInput" />
+    </view>
+    <picker range="{{mealTypes}}" value="{{mealTypeIndex}}" bindchange="onMealTypeChange">
+      <view class="form-input">餐次：{{MealTypeLabel[mealTypes[mealTypeIndex]]}}</view>
+    </picker>
+    <button class="btn-primary action-btn" bindtap="onSubmit">提交</button>
+  </view>
+
+  <view wx:if="{{summary}}" class="panel">
+    <text class="title">当日汇总</text>
+    <text class="list-item-meta">总热量 {{summary.totalCalorie || summary.calorie || 0}} kcal</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <view wx:elif="{{!records.length}}" class="empty-block">暂无记录</view>
+
+  <view wx:for="{{records}}" wx:key="id" class="list-item">
+    <view class="row">
+      <text class="tag">{{item.mealTypeLabel}}</text>
+      <text class="list-item-title">{{item.foodName}}</text>
+    </view>
+    <text class="list-item-meta">{{item.calorie || 0}} kcal · {{item.amount}}{{item.unit}}</text>
+    <button class="btn-secondary mini-btn" data-id="{{item.id}}" bindtap="onDelete">删除</button>
+  </view>
+</view>

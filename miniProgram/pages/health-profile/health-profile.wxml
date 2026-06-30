@@ -1,0 +1,47 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <view wx:else class="panel">
+    <text class="title">健康档案</text>
+
+    <view class="form-item">
+      <text class="form-label">身高 (cm)</text>
+      <input class="form-input" type="digit" value="{{profile.heightCm}}" data-field="heightCm" bindinput="onInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">体重 (kg)</text>
+      <input class="form-input" type="digit" value="{{profile.weightKg}}" data-field="weightKg" bindinput="onInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">年龄</text>
+      <input class="form-input" type="number" value="{{profile.age}}" data-field="age" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">性别</text>
+      <picker range="{{genderLabels}}" value="{{genderIndex}}" bindchange="onGenderChange">
+        <view class="form-input">{{genderLabels[genderIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">活动水平</text>
+      <picker range="{{activityLabels}}" value="{{activityIndex}}" bindchange="onActivityChange">
+        <view class="form-input">{{activityLabels[activityIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">健康目标</text>
+      <picker range="{{goalLabels}}" value="{{goalIndex}}" bindchange="onGoalChange">
+        <view class="form-input">{{goalLabels[goalIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">每日热量目标</text>
+      <input class="form-input" type="number" value="{{profile.dailyCalorieTarget}}" data-field="dailyCalorieTarget" bindinput="onInput" />
+    </view>
+
+    <button class="btn-primary" bindtap="onSave">保存档案</button>
+  </view>
+</view>

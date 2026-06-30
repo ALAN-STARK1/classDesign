@@ -1,0 +1,56 @@
+<view class="container">
+  <view class="panel">
+    <text class="eyebrow">TODAY</text>
+    <text class="title">今日概览</text>
+    <text class="subtitle">{{date}}</text>
+
+    <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+
+    <block wx:else>
+      <view class="metric-grid">
+        <view class="metric-card">
+          <text class="metric-label">今日摄入</text>
+          <text class="metric-value accent">{{nutrition.calorie || 0}}</text>
+          <text class="metric-label">kcal</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-label">目标热量</text>
+          <text class="metric-value">{{nutrition.targetCalorie || summary.dailyCalorieTarget || 1600}}</text>
+          <text class="metric-label">kcal</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-label">蛋白质</text>
+          <text class="metric-value">{{nutrition.protein || 0}}g</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-label">完成度</text>
+          <text class="metric-value accent">{{nutrition.score || 0}}%</text>
+        </view>
+      </view>
+
+      <view wx:if="{{goalCycle}}" class="list-item">
+        <text class="list-item-title">当前目标：{{goalCycle.goalLabel}}</text>
+        <text class="list-item-meta">周期 {{goalCycle.startDate}} ~ {{goalCycle.endDate}}</text>
+      </view>
+
+      <view wx:if="{{plan && plan.items && plan.items.length}}" class="list-item">
+        <text class="list-item-title">今日膳食计划</text>
+        <text class="list-item-meta">共 {{plan.items.length}} 餐，点击查看详情</text>
+        <button class="btn-secondary mini-btn" bindtap="goMealPlans">查看计划</button>
+      </view>
+
+      <view wx:if="{{risks.length}}">
+        <text class="subtitle">近期营养风险</text>
+        <view wx:for="{{risks}}" wx:key="id" class="risk-card {{item.severity}}">
+          <text class="list-item-title">{{item.title}}</text>
+          <text class="list-item-meta">{{item.description}}</text>
+        </view>
+      </view>
+
+      <view class="quick-actions">
+        <button class="btn-primary" bindtap="goMealRecords">记录膳食</button>
+        <button class="btn-secondary" bindtap="goNutrition">营养分析</button>
+      </view>
+    </block>
+  </view>
+</view>

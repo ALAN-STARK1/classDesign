@@ -1,0 +1,27 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="empty-block">加载中...</view>
+  <block wx:else>
+    <view class="panel">
+      <text class="title">{{post.title}}</text>
+      <text class="subtitle">{{post.authorName || post.username}}</text>
+      <text class="content">{{post.content}}</text>
+      <view class="actions">
+        <button class="btn-secondary mini-btn" bindtap="onLike">点赞 {{post.likeCount || 0}}</button>
+        <button class="btn-secondary mini-btn" bindtap="onFavorite">收藏</button>
+      </view>
+    </view>
+
+    <view class="panel">
+      <text class="title">评论 ({{comments.length}})</text>
+      <view wx:for="{{comments}}" wx:key="id" class="list-item">
+        <text class="list-item-title">{{item.authorName || item.username}}</text>
+        <text class="list-item-meta">{{item.content}}</text>
+      </view>
+    </view>
+
+    <view class="panel">
+      <input class="form-input" placeholder="写评论..." value="{{commentText}}" bindinput="onCommentInput" />
+      <button class="btn-primary action-btn" bindtap="onSubmitComment">发送</button>
+    </view>
+  </block>
+</view>

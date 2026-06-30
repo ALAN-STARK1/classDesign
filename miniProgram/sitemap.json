@@ -1,0 +1,4 @@
+{
+  "desc": "INDRAS 智能健康膳食管理",
+  "rules": [{ "action": "allow", "page": "*" }]
+}
