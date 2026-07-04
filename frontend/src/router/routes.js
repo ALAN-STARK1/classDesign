@@ -1,6 +1,5 @@
 import AppLayout from '../components/layout/AppLayout.vue'
 import AiCallLogsView from '../views/admin/AiCallLogsView.vue'
-import DemoDataView from '../views/admin/DemoDataView.vue'
 import PostReviewView from '../views/admin/PostReviewView.vue'
 import RecipeReviewView from '../views/admin/RecipeReviewView.vue'
 import ReportStatisticsView from '../views/admin/ReportStatisticsView.vue'
@@ -70,7 +69,6 @@ export const routes = [
       { path: 'admin/ai-call-logs', name: 'admin-ai-call-logs', component: AiCallLogsView, meta: { title: 'AI 调用日志', roles: ['ADMIN'] } },
       { path: 'admin/nutrition-risk-results', name: 'admin-risk-results', component: RiskResultsView, meta: { title: '风险结果管理', roles: ['ADMIN'] } },
       { path: 'admin/nutrition-reports/statistics', name: 'admin-report-statistics', component: ReportStatisticsView, meta: { title: '报告统计', roles: ['ADMIN'] } },
-      { path: 'admin/demo-data', name: 'admin-demo-data', component: DemoDataView, meta: { title: '演示数据', roles: ['ADMIN'] } },
       { path: 'admin/nutrition-risk-rules', name: 'admin-risk-rules', component: NutritionRiskRulesView, meta: { title: '风险规则配置', roles: ['ADMIN'] } },
     ],
   },

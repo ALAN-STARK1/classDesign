@@ -259,7 +259,7 @@ async function publishPost() {
       aiSourceImageUrl: detail.value.sourceImageUrl || '',
       imageIds: postForm.images.map((item) => item.id),
     })
-    ElMessage.success('已发布到社区')
+    ElMessage.success('已提交社区审核')
     resetPostForm()
   } catch (err) {
     handleRequestError(err)

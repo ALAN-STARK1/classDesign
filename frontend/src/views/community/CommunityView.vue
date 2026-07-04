@@ -142,7 +142,7 @@ async function submitPost() {
         .map((item) => item.trim())
         .filter(Boolean),
     })
-    ElMessage.success('帖子已发布')
+    ElMessage.success('帖子已提交审核')
     dialogVisible.value = false
     resetCreateForm()
     await load()

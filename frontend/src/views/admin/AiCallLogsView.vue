@@ -13,10 +13,8 @@ const filters = reactive({ model: '', status: '' })
 
 const modelOptions = [
   { label: '全部模型', value: '' },
-  { label: 'Fable 5', value: 'fable-5' },
-  { label: 'Opus 4.8', value: 'opus-4-8' },
-  { label: 'Sonnet 4.6', value: 'sonnet-4-6' },
-  { label: 'Haiku 4.5', value: 'haiku-4-5' },
+  { label: 'DeepSeek Chat', value: 'deepseek-chat' },
+  { label: 'Kimi Vision', value: 'kimi-vision' },
 ]
 
 const statusOptions = [
@@ -35,6 +33,7 @@ const statusLabels = {
 const endpointLabels = {
   '/ai-recipes/parse': '文本解析',
   '/ai-recipes/parse-image': '图片识别',
+  '/ai/advisor/chat': '营养顾问',
   '/meal-plans/generate/day': '计划生成',
   '/nutrition-risk-rules/evaluate': '风险评估',
 }
@@ -54,7 +53,12 @@ async function load() {
       model: filters.model,
       status: filters.status,
     })
-    logs.value = result?.items || []
+    const items = result?.items || []
+    logs.value = items.filter((item) => {
+      const modelMatched = !filters.model || item.model === filters.model
+      const statusMatched = !filters.status || item.status === filters.status
+      return modelMatched && statusMatched
+    })
     pagination.total = result?.total || 0
   } catch (err) {
     error.value = handleRequestError(err).message

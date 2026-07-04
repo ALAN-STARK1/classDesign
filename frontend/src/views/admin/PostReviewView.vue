@@ -8,6 +8,7 @@ import { CommunityPostStatusLabel } from '../../constants/labels'
 import { fetchCommunityPosts } from '../../services/modules/community.service'
 import { reviewPost } from '../../services/modules/admin.service'
 import { handleRequestError } from '../../services/request/http'
+import { resolveUploadUrl } from '../../utils/media'
 
 const loading = ref(false)
 const error = ref('')
@@ -42,6 +43,10 @@ async function load() {
 function search() {
   pagination.page = 1
   load()
+}
+
+function imageSrc(url) {
+  return resolveUploadUrl(url)
 }
 
 async function doReview(row, status) {
@@ -88,7 +93,7 @@ onMounted(load)
           <el-table-column label="封面" width="120">
             <template #default="{ row }">
               <div v-if="row.coverImageUrl" class="review-post-cover">
-                <img :src="row.coverImageUrl" :alt="row.title" />
+                <img :src="imageSrc(row.coverImageUrl)" :alt="row.title" />
               </div>
               <div v-else class="review-post-cover review-post-cover-empty">
                 <el-icon><Picture /></el-icon>

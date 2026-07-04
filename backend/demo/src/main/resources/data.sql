@@ -71,7 +71,11 @@ INSERT INTO recipe (id, user_id, name, description, category, difficulty, cook_m
 (1005, NULL, '清炒西兰花鸡蛋', '高蛋白晚餐', 'DINNER', 'EASY', 15, 1, 340.00, 28.00, 18.00, 12.00, 'ONLINE'),
 (1006, NULL, '苹果轻食', '低糖加餐', 'SNACK', 'EASY', 5, 1, 104.00, 0.60, 0.40, 27.60, 'ONLINE'),
 (1007, NULL, 'Brown Rice Bowl', '控糖主食', 'LUNCH', 'NORMAL', 25, 1, 350.00, 12.00, 6.00, 55.00, 'ONLINE'),
-(1008, NULL, '增肌蛋白餐', '高蛋白增肌', 'LUNCH', 'NORMAL', 30, 1, 520.00, 48.00, 15.00, 40.00, 'ONLINE');
+(1008, NULL, '增肌蛋白餐', '高蛋白增肌', 'LUNCH', 'NORMAL', 30, 1, 520.00, 48.00, 15.00, 40.00, 'ONLINE'),
+(1009, 2, '香煎豆腐藜麦碗', '用户提交的轻食菜谱，等待管理员审核。', 'LUNCH', 'NORMAL', 22, 1, 410.00, 24.00, 13.00, 48.00, 'PENDING'),
+(1010, 3, '牛肉糙米增肌餐', '高蛋白午餐，适合训练日。', 'LUNCH', 'HARD', 35, 1, 680.00, 52.00, 20.00, 65.00, 'PENDING'),
+(1011, 4, '控糖鸡蛋蔬菜卷', '低糖高纤维早餐。', 'BREAKFAST', 'EASY', 18, 1, 290.00, 20.00, 11.00, 28.00, 'PENDING'),
+(1012, 5, '少盐番茄鸡胸汤', '少盐高蛋白晚餐汤品。', 'DINNER', 'NORMAL', 28, 2, 330.00, 34.00, 7.00, 30.00, 'DRAFT');
 
 INSERT INTO recipe_ingredient (id, recipe_id, ingredient_id, amount_g, remark) VALUES
 (1, 1001, 1, 120.00, '切片'),
@@ -88,7 +92,13 @@ INSERT INTO recipe_ingredient (id, recipe_id, ingredient_id, amount_g, remark) V
 (12, 1007, 10, 150.00, NULL),
 (13, 1007, 1, 100.00, NULL),
 (14, 1008, 1, 200.00, NULL),
-(15, 1008, 5, 150.00, NULL);
+(15, 1008, 5, 150.00, NULL),
+(16, 1009, 2, 120.00, '焯水'),
+(17, 1009, 6, 60.00, '替代藜麦口感'),
+(18, 1010, 1, 180.00, '高蛋白肉类'),
+(19, 1010, 10, 180.00, '主食'),
+(20, 1011, 4, 100.00, '蛋卷主体'),
+(21, 1012, 1, 160.00, '切块炖汤');
 
 INSERT INTO recipe_step (id, recipe_id, step_no, content) VALUES
 (1, 1001, 1, '鸡胸肉切片并腌制。'),
@@ -98,7 +108,13 @@ INSERT INTO recipe_step (id, recipe_id, step_no, content) VALUES
 (5, 1002, 2, '先炒蛋盛出，再炒番茄，最后合炒。'),
 (6, 1003, 1, '燕麦加入温牛奶，微波加热2分钟。'),
 (7, 1004, 1, '西兰花焯水后清炒。'),
-(8, 1005, 1, '西兰花焯水，鸡蛋炒熟，一起翻炒。');
+(8, 1005, 1, '西兰花焯水，鸡蛋炒熟，一起翻炒。'),
+(9, 1009, 1, '豆腐煎至两面金黄。'),
+(10, 1009, 2, '配西兰花和主食装盘。'),
+(11, 1010, 1, '牛肉切片腌制后快炒。'),
+(12, 1010, 2, '搭配糙米和蔬菜装盘。'),
+(13, 1011, 1, '鸡蛋摊成蛋饼，卷入蔬菜。'),
+(14, 1012, 1, '鸡胸肉和番茄小火炖煮，少盐调味。');
 
 INSERT INTO recipe_favorite (id, user_id, recipe_id, created_at) VALUES
 (1, 2, 1001, '2026-06-20 10:00:00'),
@@ -150,10 +166,24 @@ INSERT INTO nutrition_risk_rule (id, rule_code, rule_name, scenario, nutrient, o
 
 INSERT INTO nutrition_risk_result (id, user_id, rule_id, source_type, source_id, risk_date, severity, message, suggestion, created_at) VALUES
 (1, 2, 1, 'DAY_SUMMARY', NULL, '2026-06-24', 'INFO', '午餐碳水略高，可适当减少主食。', '晚餐减少油脂和主食。', '2026-06-24 20:00:00'),
-(2, 2, 1, 'DAY_SUMMARY', NULL, '2026-06-25', 'WARNING', '今日热量已超出减脂目标。', '晚餐减少油脂和主食。', '2026-06-25 20:00:00');
+(2, 2, 1, 'DAY_SUMMARY', NULL, '2026-06-25', 'WARNING', '今日热量已超出减脂目标。', '晚餐减少油脂和主食。', '2026-06-25 20:00:00'),
+(3, 4, 2, 'MEAL_RECORD', 4004, '2026-06-25', 'WARNING', '当前餐碳水偏高。', '减少米饭摄入，增加绿叶菜。', '2026-06-25 20:15:00'),
+(4, 4, 2, 'DAY_SUMMARY', NULL, '2026-06-26', 'WARNING', '控糖日碳水偏高。', '早餐选择低 GI 主食。', '2026-06-26 20:10:00'),
+(5, 2, 3, 'DAY_SUMMARY', NULL, '2026-06-26', 'DANGER', '钠摄入偏高。', '减少加工食品和酱料。', '2026-06-26 20:20:00'),
+(6, 3, 4, 'DAY_SUMMARY', NULL, '2026-06-26', 'INFO', '蛋白质未达到增肌目标。', '晚餐补充鸡胸肉或牛奶。', '2026-06-26 20:30:00'),
+(7, 2, 1, 'DAY_SUMMARY', NULL, '2026-06-27', 'WARNING', '减脂热量接近上限。', '加餐控制在 100 千卡内。', '2026-06-27 20:00:00'),
+(8, 4, 2, 'MEAL_RECORD', 4004, '2026-06-27', 'WARNING', '晚餐碳水偏高。', '用西兰花替代部分主食。', '2026-06-27 20:12:00'),
+(9, 2, 3, 'DAY_SUMMARY', NULL, '2026-06-28', 'DANGER', '连续两日钠摄入偏高。', '本周优先选择清蒸和水煮。', '2026-06-28 20:18:00'),
+(10, 3, 4, 'DAY_SUMMARY', NULL, '2026-06-28', 'INFO', '训练日蛋白质略低。', '增加一份高蛋白加餐。', '2026-06-28 20:28:00');
 
 INSERT INTO nutrition_report (id, user_id, report_type, start_date, end_date, avg_calorie, avg_protein, avg_fat, avg_carbohydrate, target_days, record_days, completion_rate, risk_count, summary, suggestions_json, created_at) VALUES
-(1, 2, 'WEEKLY', '2026-06-22', '2026-06-28', 1520.00, 82.00, 42.00, 180.00, 5, 6, 78.50, 3, '本周整体热量控制较好，蛋白质摄入稳定。', '["继续保持早餐记录习惯。","注意控制晚餐碳水。"]', '2026-06-28 22:00:00');
+(1, 2, 'WEEKLY', '2026-06-22', '2026-06-28', 1520.00, 82.00, 42.00, 180.00, 5, 6, 78.50, 3, '本周整体热量控制较好，蛋白质摄入稳定。', '["继续保持早餐记录习惯。","注意控制晚餐碳水。"]', '2026-06-28 22:00:00'),
+(2, 3, 'WEEKLY', '2026-06-22', '2026-06-28', 2460.00, 118.00, 72.00, 260.00, 6, 5, 68.00, 2, '增肌周期记录较完整，但蛋白质仍略低。', '["训练日晚餐增加优质蛋白。","保持一日四餐节奏。"]', '2026-06-28 22:10:00'),
+(3, 4, 'WEEKLY', '2026-06-22', '2026-06-28', 1680.00, 76.00, 48.00, 210.00, 6, 6, 82.00, 3, '控糖用户记录完整，碳水波动偏大。', '["优先选择低 GI 主食。","晚餐减少精制碳水。"]', '2026-06-28 22:20:00'),
+(4, 2, 'MONTHLY', '2026-06-01', '2026-06-30', 1588.00, 84.00, 45.00, 188.00, 24, 21, 74.20, 7, '本月减脂执行稳定，偶有钠摄入偏高。', '["每周至少复盘一次体重趋势。","减少高盐调味料。"]', '2026-06-30 22:00:00'),
+(5, 3, 'MONTHLY', '2026-06-01', '2026-06-30', 2620.00, 125.00, 78.00, 300.00, 24, 18, 63.50, 5, '增肌热量充足，记录天数不足。', '["提高晚餐记录率。","训练后补充蛋白。"]', '2026-06-30 22:08:00'),
+(6, 4, 'MONTHLY', '2026-06-01', '2026-06-30', 1710.00, 78.00, 49.00, 205.00, 24, 23, 86.00, 6, '控糖执行较好，碳水结构需要优化。', '["减少白米饭比例。","增加蔬菜和豆制品。"]', '2026-06-30 22:16:00'),
+(7, 2, 'WEEKLY', '2026-06-29', '2026-07-05', 1490.00, 88.00, 39.00, 168.00, 5, 4, 80.00, 2, '本周热量更接近目标。', '["继续保持高蛋白早餐。"]', '2026-07-05 22:00:00');
 
 -- ========== AI 解析菜谱 ==========
 INSERT INTO ai_recipe (id, user_id, source_type, recipe_name, description, recognized_foods_json, ingredients_json, nutrition_json, suitability_score, suitability_reason, health_tips_json, warnings_json, raw_response_json, source_image_url, source_image_key, status, created_at) VALUES
@@ -178,7 +208,16 @@ INSERT INTO ai_recipe_step (id, ai_recipe_id, step_no, content) VALUES
 INSERT INTO ai_call_log (id, user_id, scene, request_summary, elapsed_ms, success, error_message, created_at) VALUES
 (1, 2, 'TEXT_PARSE', '想做减脂晚餐，食材有鸡胸肉和西兰花', 1200, TRUE, NULL, '2026-06-24 11:00:00'),
 (2, 2, 'IMAGE_PARSE', '上传食物图片解析', 3500, TRUE, NULL, '2026-06-25 12:00:00'),
-(3, 2, 'TEXT_PARSE', 'DeepSeek API key is not configured', 50, FALSE, 'DeepSeek API key is not configured', '2026-06-25 14:00:00');
+(3, 2, 'TEXT_PARSE', 'DeepSeek API key is not configured', 50, FALSE, 'DeepSeek API key is not configured', '2026-06-25 14:00:00'),
+(4, 2, 'ADVISOR_CHAT', '今天减脂午餐应该怎么搭配？', 860, TRUE, NULL, '2026-06-26 09:10:00'),
+(5, 3, 'ADVISOR_CHAT', '训练后晚餐怎么补蛋白？', 940, TRUE, NULL, '2026-06-26 10:15:00'),
+(6, 4, 'TEXT_PARSE', '低糖早餐：鸡蛋、燕麦、牛奶', 1320, TRUE, NULL, '2026-06-26 11:20:00'),
+(7, 4, 'IMAGE_PARSE', '上传控糖晚餐图片解析', 4100, TRUE, NULL, '2026-06-26 18:45:00'),
+(8, 2, 'MEAL_PLAN_GENERATE', '根据减脂目标生成今日膳食计划', 760, TRUE, NULL, '2026-06-27 08:30:00'),
+(9, 3, 'RISK_EVALUATE', '评估增肌日蛋白质摄入风险', 420, TRUE, NULL, '2026-06-27 21:00:00'),
+(10, 2, 'IMAGE_PARSE', 'Kimi vision request timeout', 120000, FALSE, 'Kimi 视觉模型响应超时', '2026-06-28 12:05:00'),
+(11, 4, 'ADVISOR_CHAT', '控糖用户晚餐碳水建议', 910, TRUE, NULL, '2026-06-28 19:10:00'),
+(12, 2, 'TEXT_PARSE', '解析一份少盐番茄鸡胸汤', 1180, TRUE, NULL, '2026-06-29 09:40:00');
 
 -- ========== 社区 ==========
 INSERT INTO community_post (id, user_id, title, content, recipe_name, tags_json, source_type, source_id, status, like_count, comment_count, favorite_count, published_at, created_at) VALUES

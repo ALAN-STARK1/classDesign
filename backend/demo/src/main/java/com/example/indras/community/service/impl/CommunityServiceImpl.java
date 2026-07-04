@@ -83,11 +83,10 @@ public class CommunityServiceImpl implements CommunityService {
                 .recipeName(request.getRecipeName())
                 .tagsJson(jsonHelper.write(request.getTags() == null ? List.of() : request.getTags()))
                 .sourceType("MANUAL")
-                .status("ONLINE")
+                .status("PENDING")
                 .likeCount(0)
                 .commentCount(0)
                 .favoriteCount(0)
-                .publishedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
         communityPostMapper.insert(post);
@@ -129,11 +128,10 @@ public class CommunityServiceImpl implements CommunityService {
                 .tagsJson("[]")
                 .sourceType("AI_RECIPE")
                 .sourceId(aiRecipeId)
-                .status("ONLINE")
+                .status("PENDING")
                 .likeCount(0)
                 .commentCount(0)
                 .favoriteCount(0)
-                .publishedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
         communityPostMapper.insert(post);

@@ -13,7 +13,6 @@ import {
   MagicStick,
   Notebook,
   Setting,
-  Switch,
   SwitchButton,
   Tickets,
   TrendCharts,
@@ -53,7 +52,6 @@ const adminNavItems = [
   { label: '风险结果', path: '/admin/nutrition-risk-results', icon: Warning },
   { label: '报告统计', path: '/admin/nutrition-reports/statistics', icon: DataAnalysis },
   { label: '风险规则', path: '/admin/nutrition-risk-rules', icon: Setting },
-  { label: '演示数据', path: '/admin/demo-data', icon: Switch },
 ]
 
 const pageTitle = computed(() => route.meta.title || '健康控制台')
@@ -108,10 +106,6 @@ function logout() {
         </div>
       </nav>
 
-      <div class="sidebar-card">
-        <span>Mock 场景</span>
-        <p>控制台设置 window.__MOCK_SCENARIO__ 可切换单接口的 success、empty、error、timeout。</p>
-      </div>
     </aside>
 
     <main class="main-panel">

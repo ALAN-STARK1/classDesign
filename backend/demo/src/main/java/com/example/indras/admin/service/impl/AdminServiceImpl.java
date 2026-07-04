@@ -28,7 +28,9 @@ import com.example.indras.recipe.vo.RecipeDetailVO;
 import com.example.indras.report.entity.NutritionReport;
 import com.example.indras.report.mapper.NutritionReportMapper;
 import com.example.indras.risk.entity.NutritionRiskResult;
+import com.example.indras.risk.entity.NutritionRiskRule;
 import com.example.indras.risk.mapper.NutritionRiskResultMapper;
+import com.example.indras.risk.mapper.NutritionRiskRuleMapper;
 import com.example.indras.risk.vo.NutritionRiskResultVO;
 import com.example.indras.user.entity.SysUser;
 import com.example.indras.user.mapper.SysUserMapper;
@@ -42,7 +44,11 @@ import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Objects;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +61,7 @@ public class AdminServiceImpl implements AdminService {
     private final CommunityService communityService;
     private final AiCallLogMapper aiCallLogMapper;
     private final NutritionRiskResultMapper nutritionRiskResultMapper;
+    private final NutritionRiskRuleMapper nutritionRiskRuleMapper;
     private final NutritionReportMapper nutritionReportMapper;
 
     @Override
@@ -119,10 +126,17 @@ public class AdminServiceImpl implements AdminService {
         return PageUtils.toPageResult(page, log -> AiCallLogVO.builder()
                 .id(log.getId())
                 .userId(log.getUserId())
+                .callerName(resolveUsername(log.getUserId()))
                 .scene(log.getScene())
+                .model(resolveAiModel(log.getScene()))
+                .endpoint(resolveAiEndpoint(log.getScene()))
                 .requestSummary(log.getRequestSummary())
                 .elapsedMs(log.getElapsedMs())
+                .latencyMs(log.getElapsedMs())
+                .inputTokens(estimateInputTokens(log.getRequestSummary()))
+                .outputTokens(estimateOutputTokens(log))
                 .success(log.getSuccess())
+                .status(resolveAiStatus(log))
                 .errorMessage(log.getErrorMessage())
                 .createdAt(log.getCreatedAt() == null ? null
                         : OffsetDateTime.of(log.getCreatedAt(), ZoneOffset.ofHours(8)))
@@ -154,6 +168,7 @@ public class AdminServiceImpl implements AdminService {
                 .eq(NutritionReport::getReportType, "WEEKLY"));
         Long monthly = nutritionReportMapper.selectCount(Wrappers.<NutritionReport>lambdaQuery()
                 .eq(NutritionReport::getReportType, "MONTHLY"));
+        Long total = nutritionReportMapper.selectCount(Wrappers.<NutritionReport>lambdaQuery());
         Long activeUsers = sysUserMapper.selectCount(Wrappers.<SysUser>lambdaQuery()
                 .eq(SysUser::getStatus, UserStatus.ENABLED.name()));
         List<NutritionReport> reports = nutritionReportMapper.selectList(Wrappers.<NutritionReport>lambdaQuery()
@@ -163,12 +178,120 @@ public class AdminServiceImpl implements AdminService {
                 .map(NutritionReport::getCompletionRate)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .divide(BigDecimal.valueOf(reports.size()), 2, RoundingMode.HALF_UP);
+        List<NutritionReport> allReports = nutritionReportMapper.selectList(Wrappers.<NutritionReport>lambdaQuery()
+                .orderByAsc(NutritionReport::getCreatedAt));
+        long reportUserCount = allReports.stream()
+                .map(NutritionReport::getUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .count();
+        List<NutritionRiskResult> riskResults = nutritionRiskResultMapper.selectList(Wrappers.<NutritionRiskResult>lambdaQuery());
+        Map<Long, String> ruleNameMap = nutritionRiskRuleMapper.selectList(Wrappers.<NutritionRiskRule>lambdaQuery()).stream()
+                .collect(Collectors.toMap(NutritionRiskRule::getId, NutritionRiskRule::getRuleName, (a, b) -> a));
+        List<NutritionReportStatisticsVO.TopRiskVO> topRisks = riskResults.stream()
+                .filter(result -> result.getRuleId() != null)
+                .collect(Collectors.groupingBy(NutritionRiskResult::getRuleId, Collectors.counting()))
+                .entrySet().stream()
+                .sorted(Map.Entry.<Long, Long>comparingByValue(Comparator.reverseOrder()))
+                .limit(5)
+                .map(entry -> NutritionReportStatisticsVO.TopRiskVO.builder()
+                        .ruleId(entry.getKey())
+                        .ruleName(ruleNameMap.getOrDefault(entry.getKey(), "规则 #" + entry.getKey()))
+                        .count(entry.getValue())
+                        .build())
+                .toList();
+        List<NutritionReportStatisticsVO.DailyReportTrendVO> trend = allReports.stream()
+                .filter(report -> report.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(report -> report.getCreatedAt().toLocalDate().toString(),
+                        java.util.TreeMap::new, Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> NutritionReportStatisticsVO.DailyReportTrendVO.builder()
+                        .date(entry.getKey())
+                        .count(entry.getValue())
+                        .build())
+                .toList();
+        BigDecimal userReportRate = activeUsers == null || activeUsers == 0 ? BigDecimal.ZERO
+                : BigDecimal.valueOf(reportUserCount)
+                .divide(BigDecimal.valueOf(activeUsers), 4, RoundingMode.HALF_UP);
+        BigDecimal riskTriggerRate = total == null || total == 0 ? BigDecimal.ZERO
+                : BigDecimal.valueOf(riskResults.size())
+                .divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_UP);
         return NutritionReportStatisticsVO.builder()
+                .totalReports(total == null ? 0 : total.intValue())
+                .weeklyCount(weekly == null ? 0 : weekly.intValue())
+                .monthlyCount(monthly == null ? 0 : monthly.intValue())
+                .averageScore(avgCompletion)
+                .userReportRate(userReportRate)
+                .riskTriggerRate(riskTriggerRate)
+                .topRisks(topRisks)
+                .dailyReportTrend(trend)
                 .weeklyReportCount(weekly == null ? 0 : weekly.intValue())
                 .monthlyReportCount(monthly == null ? 0 : monthly.intValue())
                 .activeUserCount(activeUsers == null ? 0 : activeUsers.intValue())
                 .avgCompletionRate(avgCompletion)
                 .build();
+    }
+
+    private String resolveUsername(Long userId) {
+        if (userId == null) {
+            return "system";
+        }
+        SysUser user = sysUserMapper.selectById(userId);
+        return user == null ? "user-" + userId : user.getUsername();
+    }
+
+    private String resolveAiModel(String scene) {
+        if (scene == null) {
+            return "unknown";
+        }
+        if (scene.contains("IMAGE")) {
+            return "kimi-vision";
+        }
+        if (scene.contains("ADVISOR") || scene.contains("CHAT")) {
+            return "deepseek-chat";
+        }
+        return "deepseek-chat";
+    }
+
+    private String resolveAiEndpoint(String scene) {
+        if (scene == null) {
+            return "/ai";
+        }
+        return switch (scene) {
+            case "TEXT_PARSE" -> "/ai-recipes/parse";
+            case "IMAGE_PARSE" -> "/ai-recipes/parse-image";
+            case "ADVISOR_CHAT" -> "/ai/advisor/chat";
+            case "MEAL_PLAN_GENERATE" -> "/meal-plans/generate/day";
+            case "RISK_EVALUATE" -> "/nutrition-risk-rules/evaluate";
+            default -> "/ai/" + scene.toLowerCase().replace('_', '-');
+        };
+    }
+
+    private Integer estimateInputTokens(String text) {
+        if (!StringUtils.hasText(text)) {
+            return 0;
+        }
+        return Math.max(1, text.length() / 2);
+    }
+
+    private Integer estimateOutputTokens(AiCallLog log) {
+        if (!Boolean.TRUE.equals(log.getSuccess())) {
+            return 0;
+        }
+        return Math.max(24, (log.getElapsedMs() == null ? 1000 : log.getElapsedMs()) / 40);
+    }
+
+    private String resolveAiStatus(AiCallLog log) {
+        if (Boolean.TRUE.equals(log.getSuccess())) {
+            return "SUCCESS";
+        }
+        String error = log.getErrorMessage();
+        if ((log.getElapsedMs() != null && log.getElapsedMs() >= 120000)
+                || (error != null && error.toLowerCase().contains("timeout"))
+                || (error != null && error.contains("超时"))) {
+            return "TIMEOUT";
+        }
+        return "ERROR";
     }
 
     @Override
