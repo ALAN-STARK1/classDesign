@@ -14,6 +14,8 @@ public interface MealPlanService {
 
     MealPlanVO generateDayPlan(Long userId, MealPlanGenerateRequest request);
 
+    List<MealPlanVO> generateWeekPlan(Long userId, MealPlanGenerateRequest request);
+
     MealPlanVO getDayPlan(Long userId, LocalDate planDate);
 
     List<ReplacementCandidateVO> replacementCandidates(Long userId, Long planId, Long itemId, String reason, int limit);
@@ -31,4 +33,8 @@ public interface MealPlanService {
     CountResultVO toMealRecords(Long userId, Long planId, MealPlanToRecordsRequest request);
 
     ShoppingListVO shoppingList(Long userId, Long planId);
+
+    ShoppingListVO weeklyShoppingList(Long userId, LocalDate startDate);
+
+    WeeklyMealPosterVO weeklyPoster(Long userId, LocalDate startDate);
 }

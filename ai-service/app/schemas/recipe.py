@@ -54,12 +54,15 @@ class RecipeParseResult(BaseModel):
     recipeName: str
     recognizedFoods: list[FoodRecognition] = Field(default_factory=list)
     description: str
+    imagePrompt: str = ""
+    visualDescription: str = ""
     suitability: Suitability
     ingredients: list[RecipeIngredient] = Field(default_factory=list)
     nutritionEstimate: NutritionEstimate
     cookingSteps: list[str] = Field(default_factory=list)
     healthTips: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+    shoppingHints: list[str] = Field(default_factory=list)
 
 
 class ParsedRecipeResponse(BaseModel):

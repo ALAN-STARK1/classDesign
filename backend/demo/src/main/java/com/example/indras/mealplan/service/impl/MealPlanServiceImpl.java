@@ -139,6 +139,22 @@ public class MealPlanServiceImpl implements MealPlanService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<MealPlanVO> generateWeekPlan(Long userId, MealPlanGenerateRequest request) {
+        LocalDate startDate = request.getPlanDate() == null ? LocalDate.now() : request.getPlanDate();
+        List<MealPlanVO> result = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            MealPlanGenerateRequest dayRequest = MealPlanGenerateRequest.builder()
+                    .planDate(startDate.plusDays(i))
+                    .targetCalorie(request.getTargetCalorie())
+                    .goalCycleId(request.getGoalCycleId())
+                    .build();
+            result.add(generateDayPlan(userId, dayRequest));
+        }
+        return result;
+    }
+
+    @Override
     public MealPlanVO getDayPlan(Long userId, LocalDate planDate) {
         MealPlan plan = mealPlanMapper.selectOne(Wrappers.<MealPlan>lambdaQuery()
                 .eq(MealPlan::getUserId, userId)
@@ -338,8 +354,59 @@ public class MealPlanServiceImpl implements MealPlanService {
     @Override
     public ShoppingListVO shoppingList(Long userId, Long planId) {
         MealPlan plan = requireOwnedPlan(userId, planId);
+        List<ShoppingListItemVO> shoppingItems = shoppingItemsForPlans(List.of(plan.getId()));
+        return ShoppingListVO.builder()
+                .planId(planId)
+                .planDate(plan.getPlanDate())
+                .items(shoppingItems)
+                .build();
+    }
+
+    @Override
+    public ShoppingListVO weeklyShoppingList(Long userId, LocalDate startDate) {
+        LocalDate safeStart = startDate == null ? LocalDate.now() : startDate;
+        List<MealPlan> plans = weekPlans(userId, safeStart);
+        List<ShoppingListItemVO> shoppingItems = shoppingItemsForPlans(plans.stream().map(MealPlan::getId).toList());
+        return ShoppingListVO.builder()
+                .planDate(safeStart)
+                .items(shoppingItems)
+                .build();
+    }
+
+    @Override
+    public WeeklyMealPosterVO weeklyPoster(Long userId, LocalDate startDate) {
+        LocalDate safeStart = startDate == null ? LocalDate.now() : startDate;
+        List<MealPlan> plans = weekPlans(userId, safeStart);
+        List<WeeklyMealPosterVO.WeeklyMealDayVO> days = plans.stream()
+                .map(plan -> WeeklyMealPosterVO.WeeklyMealDayVO.builder()
+                        .date(plan.getPlanDate())
+                        .totalCalorie(plan.getActualCalorie())
+                        .meals(items(plan.getId()).stream().map(this::toItemVo).toList())
+                        .build())
+                .toList();
+        BigDecimal totalCalorie = plans.stream()
+                .map(MealPlan::getActualCalorie)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        HealthProfile profile = healthProfileMapper.selectOne(Wrappers.<HealthProfile>lambdaQuery()
+                .eq(HealthProfile::getUserId, userId));
+        return WeeklyMealPosterVO.builder()
+                .startDate(safeStart)
+                .endDate(safeStart.plusDays(6))
+                .healthGoal(profile == null ? null : profile.getHealthGoal())
+                .targetCalorie(profile == null ? null : profile.getDailyCalorieTarget())
+                .totalCalorie(totalCalorie)
+                .summary("本周计划覆盖 " + plans.size() + " 天，建议按采购清单提前备菜。")
+                .days(days)
+                .shoppingItems(shoppingItemsForPlans(plans.stream().map(MealPlan::getId).toList()))
+                .build();
+    }
+
+    private List<ShoppingListItemVO> shoppingItemsForPlans(List<Long> planIds) {
+        if (planIds == null || planIds.isEmpty()) {
+            return List.of();
+        }
         List<MealPlanItem> items = mealPlanItemMapper.selectList(Wrappers.<MealPlanItem>lambdaQuery()
-                .eq(MealPlanItem::getPlanId, planId));
+                .in(MealPlanItem::getPlanId, planIds));
         Map<Long, BigDecimal> amountMap = new HashMap<>();
         for (MealPlanItem item : items) {
             List<RecipeIngredient> recipeIngredients = recipeIngredientMapper.selectList(
@@ -367,10 +434,32 @@ public class MealPlanServiceImpl implements MealPlanService {
                 .filter(java.util.Objects::nonNull)
                 .sorted(Comparator.comparing(ShoppingListItemVO::getCategory, Comparator.nullsLast(String::compareTo)))
                 .toList();
-        return ShoppingListVO.builder()
-                .planId(planId)
-                .planDate(plan.getPlanDate())
-                .items(shoppingItems)
+        return shoppingItems;
+    }
+
+    private List<MealPlan> weekPlans(Long userId, LocalDate startDate) {
+        return mealPlanMapper.selectList(Wrappers.<MealPlan>lambdaQuery()
+                .eq(MealPlan::getUserId, userId)
+                .ge(MealPlan::getPlanDate, startDate)
+                .le(MealPlan::getPlanDate, startDate.plusDays(6))
+                .orderByAsc(MealPlan::getPlanDate));
+    }
+
+    private List<MealPlanItem> items(Long planId) {
+        return mealPlanItemMapper.selectList(Wrappers.<MealPlanItem>lambdaQuery()
+                .eq(MealPlanItem::getPlanId, planId)
+                .orderByAsc(MealPlanItem::getSortNo));
+    }
+
+    private MealPlanItemVO toItemVo(MealPlanItem item) {
+        return MealPlanItemVO.builder()
+                .id(item.getId())
+                .mealType(item.getMealType())
+                .recipeId(item.getRecipeId())
+                .recipeName(item.getRecipeName())
+                .calorie(item.getCalorie())
+                .suitabilityScore(item.getSuitabilityScore())
+                .recommendReason(item.getRecommendReason())
                 .build();
     }
 

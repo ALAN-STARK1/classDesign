@@ -21,6 +21,8 @@ public interface AdminService {
 
     CommunityPostDetailVO reviewPost(Long id, ReviewRequest request);
 
+    void deletePost(Long id);
+
     PageResult<AiCallLogVO> pageAiCallLogs(PageQuery query);
 
     PageResult<NutritionRiskResultVO> pageRiskResults(PageQuery query, String severity);

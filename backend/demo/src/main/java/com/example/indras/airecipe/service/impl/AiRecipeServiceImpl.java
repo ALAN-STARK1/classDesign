@@ -3,6 +3,7 @@ package com.example.indras.airecipe.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.indras.airecipe.dto.AiRecipeParseRequest;
+import com.example.indras.airecipe.dto.AiRecipeGenerateRequest;
 import com.example.indras.airecipe.dto.AiRecipeToMealRecordRequest;
 import com.example.indras.airecipe.entity.AiCallLog;
 import com.example.indras.airecipe.entity.AiRecipe;
@@ -26,9 +27,13 @@ import com.example.indras.mealrecord.entity.MealRecord;
 import com.example.indras.mealrecord.mapper.MealRecordMapper;
 import com.example.indras.mealrecord.vo.MealRecordVO;
 import com.example.indras.recipe.dto.RecipeCreateRequest;
+import com.example.indras.recipe.dto.RecipeIngredientBindRequest;
+import com.example.indras.recipe.dto.RecipeIngredientItemDTO;
 import com.example.indras.recipe.dto.RecipeStepDTO;
 import com.example.indras.recipe.service.RecipeService;
 import com.example.indras.recipe.vo.RecipeDetailVO;
+import com.example.indras.ingredient.entity.Ingredient;
+import com.example.indras.ingredient.mapper.IngredientMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.indras.common.storage.LocalFileStorageService;
@@ -39,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -61,6 +67,7 @@ public class AiRecipeServiceImpl implements AiRecipeService {
     private final AiServiceHttpClient aiServiceHttpClient;
     private final AiRecipeContextBuilder aiRecipeContextBuilder;
     private final LocalFileStorageService localFileStorageService;
+    private final IngredientMapper ingredientMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -78,6 +85,25 @@ public class AiRecipeServiceImpl implements AiRecipeService {
         } catch (Exception ex) {
             logAiCall(userId, "TEXT_PARSE", userInput, (int) (System.currentTimeMillis() - start), false, ex.getMessage());
             throw BizException.aiUnavailable("AI 文本解析失败: " + ex.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public AiRecipeVO generate(Long userId, AiRecipeGenerateRequest request) {
+        long start = System.currentTimeMillis();
+        String userInput = buildGenerateInput(request);
+        try {
+            JsonNode data = callAiParseText(userId, userInput);
+            AiRecipe saved = saveFromAiResult(userId, "GENERATED", data, null, null, userInput);
+            logAiCall(userId, "RECIPE_GENERATE", userInput, (int) (System.currentTimeMillis() - start), true, null);
+            return toDetailVo(saved);
+        } catch (BizException ex) {
+            logAiCall(userId, "RECIPE_GENERATE", userInput, (int) (System.currentTimeMillis() - start), false, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            logAiCall(userId, "RECIPE_GENERATE", userInput, (int) (System.currentTimeMillis() - start), false, ex.getMessage());
+            throw BizException.aiUnavailable("AI 原创菜谱生成失败: " + ex.getMessage());
         }
     }
 
@@ -141,15 +167,22 @@ public class AiRecipeServiceImpl implements AiRecipeService {
     @Transactional(rollbackFor = Exception.class)
     public RecipeDetailVO toRecipe(Long userId, Long id) {
         AiRecipeVO aiRecipe = toDetailVo(requireOwned(userId, id));
+        List<RecipeStepDTO> recipeSteps = new ArrayList<>();
+        List<String> cookingSteps = aiRecipe.getCookingSteps() == null ? List.of() : aiRecipe.getCookingSteps();
+        for (int i = 0; i < cookingSteps.size(); i++) {
+            recipeSteps.add(RecipeStepDTO.builder()
+                    .stepNo(i + 1)
+                    .content(cookingSteps.get(i))
+                    .build());
+        }
         RecipeCreateRequest request = RecipeCreateRequest.builder()
                 .name(aiRecipe.getRecipeName())
                 .description(aiRecipe.getDescription())
                 .category("LUNCH")
-                .steps(aiRecipe.getCookingSteps() == null ? List.of() : aiRecipe.getCookingSteps().stream()
-                        .map(step -> RecipeStepDTO.builder().content(step).build())
-                        .toList())
+                .steps(recipeSteps)
                 .build();
         RecipeDetailVO created = recipeService.create(userId, request);
+        bindAiIngredients(userId, created.getId(), aiRecipe.getIngredients());
         AiRecipe recipe = requireOwned(userId, id);
         recipe.setStatus("CONVERTED");
         aiRecipeMapper.updateById(recipe);
@@ -205,7 +238,12 @@ public class AiRecipeServiceImpl implements AiRecipeService {
 
     private JsonNode callAiParseText(Long userId, String userInput) throws Exception {
         Map<String, Object> body = aiRecipeContextBuilder.build(userId, userInput);
-        String response = aiServiceHttpClient.postJson("/ai/v1/recipes/parse", body);
+        String response;
+        try {
+            response = aiServiceHttpClient.postJson("/ai/v1/recipes/parse", body);
+        } catch (ResourceAccessException ex) {
+            throw BizException.aiUnavailable("AI 服务未启动或不可达，请先运行 start-ai-service.bat 并确认 8000 端口可访问");
+        }
         return parseAiResponse(response);
     }
 
@@ -215,10 +253,15 @@ public class AiRecipeServiceImpl implements AiRecipeService {
         }
         // ai-service: FoodClassifier 预训练模型识别 → 合并 recognitionResults → DeepSeek 生成菜谱
         Map<String, Object> context = aiRecipeContextBuilder.build(userId, prompt == null ? "" : prompt);
-        String response = aiServiceHttpClient.postMultipartImage(
-                "/ai/v1/recipes/parse-from-image",
-                file,
-                objectMapper.writeValueAsString(context));
+        String response;
+        try {
+            response = aiServiceHttpClient.postMultipartImage(
+                    "/ai/v1/recipes/parse-from-image",
+                    file,
+                    objectMapper.writeValueAsString(context));
+        } catch (ResourceAccessException ex) {
+            throw BizException.aiUnavailable("AI 服务未启动或不可达，请先运行 start-ai-service.bat 并确认 8000 端口可访问");
+        }
         return parseAiResponse(response);
     }
 
@@ -271,6 +314,58 @@ public class AiRecipeServiceImpl implements AiRecipeService {
         }
     }
 
+    private void bindAiIngredients(Long userId, Long recipeId, List<AiIngredientVO> aiIngredients) {
+        if (aiIngredients == null || aiIngredients.isEmpty()) {
+            return;
+        }
+        List<RecipeIngredientItemDTO> bindings = new ArrayList<>();
+        for (AiIngredientVO aiIngredient : aiIngredients) {
+            Ingredient ingredient = findIngredient(aiIngredient.getName());
+            if (ingredient == null) {
+                continue;
+            }
+            bindings.add(RecipeIngredientItemDTO.builder()
+                    .ingredientId(ingredient.getId())
+                    .amountG(toGramAmount(aiIngredient))
+                    .remark("AI 原创菜谱自动匹配")
+                    .build());
+        }
+        if (!bindings.isEmpty()) {
+            recipeService.bindIngredients(userId, recipeId,
+                    RecipeIngredientBindRequest.builder().ingredients(bindings).build());
+        }
+    }
+
+    private Ingredient findIngredient(String name) {
+        if (!StringUtils.hasText(name)) {
+            return null;
+        }
+        Ingredient exact = ingredientMapper.selectOne(Wrappers.<Ingredient>lambdaQuery()
+                .eq(Ingredient::getName, name)
+                .last("LIMIT 1"));
+        if (exact != null) {
+            return exact;
+        }
+        return ingredientMapper.selectList(Wrappers.<Ingredient>lambdaQuery())
+                .stream()
+                .filter(ingredient -> ingredient.getName() != null
+                        && (ingredient.getName().contains(name) || name.contains(ingredient.getName())))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private BigDecimal toGramAmount(AiIngredientVO ingredient) {
+        BigDecimal amount = ingredient.getAmount() == null ? BigDecimal.ZERO : ingredient.getAmount();
+        String unit = ingredient.getUnit() == null ? "" : ingredient.getUnit().trim().toLowerCase(Locale.ROOT);
+        if ("kg".equals(unit) || "千克".equals(unit) || "公斤".equals(unit)) {
+            return amount.multiply(BigDecimal.valueOf(1000));
+        }
+        if ("份".equals(unit) || "个".equals(unit) || "只".equals(unit)) {
+            return amount.multiply(BigDecimal.valueOf(100));
+        }
+        return amount;
+    }
+
     private void logAiCall(Long userId, String scene, String summary, int elapsedMs, boolean success, String error) {
         aiCallLogMapper.insert(AiCallLog.builder()
                 .userId(userId)
@@ -303,6 +398,8 @@ public class AiRecipeServiceImpl implements AiRecipeService {
                 .eq(AiRecipeStep::getAiRecipeId, recipe.getId())
                 .orderByAsc(AiRecipeStep::getStepNo));
         NutritionEstimateVO nutrition = jsonHelper.read(recipe.getNutritionJson(), NutritionEstimateVO.class);
+        JsonNode raw = readRawResponse(recipe);
+        List<String> cookingSteps = steps.stream().map(AiRecipeStep::getContent).toList();
         return AiRecipeVO.builder()
                 .id(recipe.getId())
                 .recipeName(recipe.getRecipeName())
@@ -312,13 +409,33 @@ public class AiRecipeServiceImpl implements AiRecipeService {
                 .suitabilityReason(recipe.getSuitabilityReason())
                 .nutritionEstimate(nutrition)
                 .ingredients(jsonHelper.readList(recipe.getIngredientsJson(), AiIngredientVO.class))
-                .cookingSteps(steps.stream().map(AiRecipeStep::getContent).toList())
+                .cookingSteps(cookingSteps)
+                .steps(cookingSteps)
+                .healthTips(jsonHelper.readStringList(recipe.getHealthTipsJson()))
                 .warnings(jsonHelper.readStringList(recipe.getWarningsJson()))
+                .shoppingHints(readStringList(raw, "shoppingHints"))
+                .imagePrompt(readText(raw, "imagePrompt"))
+                .visualDescription(readText(raw, "visualDescription"))
                 .recognizedFoods(jsonHelper.readList(recipe.getRecognizedFoodsJson(), RecognizedFoodVO.class))
                 .sourceImageUrl(recipe.getSourceImageUrl())
                 .sourceType(recipe.getSourceType())
                 .status(recipe.getStatus())
                 .build();
+    }
+
+    private JsonNode readRawResponse(AiRecipe recipe) {
+        if (!StringUtils.hasText(recipe.getRawResponseJson())) {
+            return objectMapper.createObjectNode();
+        }
+        try {
+            return objectMapper.readTree(recipe.getRawResponseJson());
+        } catch (Exception ex) {
+            return objectMapper.createObjectNode();
+        }
+    }
+
+    private String readText(JsonNode data, String field) {
+        return data != null && data.has(field) ? data.path(field).asText("") : "";
     }
 
     private List<String> readStringList(JsonNode data, String field) {
@@ -377,6 +494,35 @@ public class AiRecipeServiceImpl implements AiRecipeService {
             parts.add(text.trim());
         }
         return String.join("\n\n", parts);
+    }
+
+    private String buildGenerateInput(AiRecipeGenerateRequest request) {
+        AiRecipeGenerateRequest safe = request == null ? new AiRecipeGenerateRequest() : request;
+        List<String> parts = new ArrayList<>();
+        parts.add("请根据用户现有食材、口味偏好与健康目标创作一道原创中文菜谱。");
+        if (safe.getAvailableIngredients() != null && !safe.getAvailableIngredients().isEmpty()) {
+            parts.add("现有食材：" + String.join("、", safe.getAvailableIngredients()));
+        }
+        if (safe.getTastePreferences() != null && !safe.getTastePreferences().isEmpty()) {
+            parts.add("口味偏好：" + String.join("、", safe.getTastePreferences()));
+        }
+        if (StringUtils.hasText(safe.getTargetMealType())) {
+            parts.add("目标餐次：" + safe.getTargetMealType());
+        }
+        if (StringUtils.hasText(safe.getHealthGoal())) {
+            parts.add("健康目标：" + safe.getHealthGoal());
+        }
+        if (safe.getAvoidIngredients() != null && !safe.getAvoidIngredients().isEmpty()) {
+            parts.add("避免食材：" + String.join("、", safe.getAvoidIngredients()));
+        }
+        if (safe.getServings() != null) {
+            parts.add("份数：" + safe.getServings());
+        }
+        if (StringUtils.hasText(safe.getExtraPrompt())) {
+            parts.add("补充要求：" + safe.getExtraPrompt());
+        }
+        parts.add("必须输出原创菜谱，并包含适合前端卡片展示的配图描述、图片生成提示词、采购提示。");
+        return String.join("\n", parts);
     }
 
     private BigDecimal scale(BigDecimal value, BigDecimal ratio) {

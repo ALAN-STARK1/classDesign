@@ -28,6 +28,10 @@ export function reviewPost(id, payload) {
   })
 }
 
+export function deletePost(id) {
+  return request.delete(ENDPOINTS.admin.deletePost(id))
+}
+
 // AI call logs
 export function fetchAiCallLogs(params) {
   return request.get(ENDPOINTS.admin.aiCallLogs, { params })

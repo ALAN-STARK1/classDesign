@@ -7,7 +7,7 @@ import { router } from './router'
 import './style.css'
 
 async function bootstrap() {
-  if (import.meta.env.VITE_USE_MOCK === 'true') {
+  if (import.meta.env.VITE_USE_MOCK === 'enabled') {
     const { setupMock } = await import('./mock')
     setupMock()
   }

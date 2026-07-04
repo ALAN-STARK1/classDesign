@@ -12,6 +12,7 @@ import {
   deleteAiRecipe,
   fetchAiRecipeDetail,
   fetchAiRecipeHistory,
+  generateAiRecipe,
   parseAiRecipeImage,
   parseAiRecipeText,
 } from '../../services/modules/ai.service'
@@ -42,6 +43,15 @@ const textForm = reactive({
 })
 const imageForm = reactive({
   prompt: '识别图片中的菜品和主要食材',
+})
+const generateForm = reactive({
+  availableIngredients: '鸡胸肉、西兰花、糙米、番茄',
+  tastePreferences: ['清淡', '高蛋白'],
+  targetMealType: 'LUNCH',
+  healthGoal: '减脂控糖',
+  avoidIngredients: '油炸、奶油',
+  servings: 1,
+  extraPrompt: '希望 25 分钟内完成，适合工作日便当。',
 })
 const recordForm = reactive({
   date: today(),
@@ -119,6 +129,37 @@ async function parseText() {
     resetPostForm()
     detailVisible.value = true
     ElMessage.success('文本解析完成')
+    await load()
+  } catch (err) {
+    handleRequestError(err)
+  } finally {
+    parsing.value = false
+  }
+}
+
+function splitInput(value) {
+  if (Array.isArray(value)) return value
+  return String(value || '')
+    .split(/[，,、\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+async function generateRecipe() {
+  parsing.value = true
+  try {
+    detail.value = await generateAiRecipe({
+      availableIngredients: splitInput(generateForm.availableIngredients),
+      tastePreferences: splitInput(generateForm.tastePreferences),
+      targetMealType: generateForm.targetMealType,
+      healthGoal: generateForm.healthGoal,
+      avoidIngredients: splitInput(generateForm.avoidIngredients),
+      servings: generateForm.servings,
+      extraPrompt: generateForm.extraPrompt,
+    })
+    resetPostForm()
+    detailVisible.value = true
+    ElMessage.success('原创菜谱生成完成')
     await load()
   } catch (err) {
     handleRequestError(err)
@@ -293,6 +334,47 @@ onBeforeUnmount(clearPreviewUrls)
       <article class="panel">
         <div class="section-heading">
           <div>
+            <span class="eyebrow">ORIGINAL</span>
+            <h2>原创生成</h2>
+          </div>
+          <el-button type="primary" :icon="MagicStick" :loading="parsing" @click="generateRecipe">生成菜谱</el-button>
+        </div>
+        <el-form class="stack-form dense" :model="generateForm" label-position="top">
+          <el-form-item label="现有食材">
+            <el-input v-model="generateForm.availableIngredients" placeholder="用逗号分隔，如 鸡胸肉、西兰花、糙米" />
+          </el-form-item>
+          <el-form-item label="口味偏好">
+            <el-select v-model="generateForm.tastePreferences" multiple filterable allow-create default-first-option>
+              <el-option label="清淡" value="清淡" />
+              <el-option label="高蛋白" value="高蛋白" />
+              <el-option label="少油" value="少油" />
+              <el-option label="微辣" value="微辣" />
+              <el-option label="低碳水" value="低碳水" />
+            </el-select>
+          </el-form-item>
+          <div class="form-row">
+            <el-form-item label="餐次">
+              <el-segmented v-model="generateForm.targetMealType" :options="mealOptions" />
+            </el-form-item>
+            <el-form-item label="份数">
+              <el-input-number v-model="generateForm.servings" :min="1" :max="8" />
+            </el-form-item>
+          </div>
+          <el-form-item label="健康目标">
+            <el-input v-model="generateForm.healthGoal" placeholder="如 减脂控糖、增肌、高血压少盐" />
+          </el-form-item>
+          <el-form-item label="避免食材">
+            <el-input v-model="generateForm.avoidIngredients" placeholder="用逗号分隔，如 花生、油炸" />
+          </el-form-item>
+          <el-form-item label="额外要求">
+            <el-input v-model="generateForm.extraPrompt" type="textarea" :rows="2" />
+          </el-form-item>
+        </el-form>
+      </article>
+
+      <article class="panel">
+        <div class="section-heading">
+          <div>
             <span class="eyebrow">AI PARSE</span>
             <h2>文本解析</h2>
           </div>
@@ -410,6 +492,11 @@ onBeforeUnmount(clearPreviewUrls)
           <span>蛋白 {{ detail.totalProtein }}g</span>
           <span>碳水 {{ detail.totalCarbohydrate }}g</span>
         </div>
+        <article v-if="detail.visualDescription || detail.imagePrompt" class="recommend-list visual-copy">
+          <strong>配图描述</strong>
+          <p v-if="detail.visualDescription">{{ detail.visualDescription }}</p>
+          <small v-if="detail.imagePrompt">图片提示词：{{ detail.imagePrompt }}</small>
+        </article>
         <dl class="detail-list">
           <div v-for="item in detail.ingredients" :key="item.name">
             <dt>{{ item.name }}</dt>
@@ -419,6 +506,14 @@ onBeforeUnmount(clearPreviewUrls)
         <article class="recommend-list">
           <strong>步骤</strong>
           <p v-for="step in detail.steps" :key="step">{{ step }}</p>
+        </article>
+        <article v-if="detail.healthTips?.length" class="recommend-list">
+          <strong>健康适配</strong>
+          <p v-for="item in detail.healthTips" :key="item">{{ item }}</p>
+        </article>
+        <article v-if="detail.shoppingHints?.length" class="recommend-list shopping-hints">
+          <strong>采购提示</strong>
+          <p v-for="item in detail.shoppingHints" :key="item">{{ item }}</p>
         </article>
         <article v-if="detail.warnings?.length" class="recommend-list warning-list">
           <strong>提示</strong>

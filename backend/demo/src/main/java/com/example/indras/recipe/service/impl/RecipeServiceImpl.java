@@ -240,10 +240,11 @@ public class RecipeServiceImpl implements RecipeService {
         if (steps == null) {
             return;
         }
-        for (RecipeStepDTO step : steps) {
+        for (int i = 0; i < steps.size(); i++) {
+            RecipeStepDTO step = steps.get(i);
             recipeStepMapper.insert(RecipeStep.builder()
                     .recipeId(recipeId)
-                    .stepNo(step.getStepNo())
+                    .stepNo(step.getStepNo() == null ? i + 1 : step.getStepNo())
                     .content(step.getContent())
                     .build());
         }

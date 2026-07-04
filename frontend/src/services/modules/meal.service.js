@@ -31,6 +31,14 @@ export function generateDayMealPlan(payload) {
   }).then(normalizeMealPlan)
 }
 
+export function generateWeekMealPlan(payload) {
+  return request.post(ENDPOINTS.mealPlans.generateWeek, {
+    planDate: payload.planDate ?? payload.date,
+    targetCalorie: payload.targetCalorie,
+    goalCycleId: payload.goalCycleId,
+  }).then((plans) => (plans || []).map(normalizeMealPlan))
+}
+
 export function fetchDayMealPlan(params) {
   return request.get(ENDPOINTS.mealPlans.day, {
     params: { date: params.date ?? params.planDate },
@@ -89,6 +97,14 @@ export function convertPlanToRecords(planId, payload = {}) {
 
 export function fetchShoppingList(planId) {
   return request.get(ENDPOINTS.mealPlans.shoppingList(planId))
+}
+
+export function fetchWeekShoppingList(params) {
+  return request.get(ENDPOINTS.mealPlans.weekShoppingList, { params })
+}
+
+export function fetchWeekPoster(params) {
+  return request.get(ENDPOINTS.mealPlans.weekPoster, { params })
 }
 
 function normalizeMealRecord(row) {

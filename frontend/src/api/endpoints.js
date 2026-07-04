@@ -42,6 +42,7 @@ export const ENDPOINTS = {
   },
   mealPlans: {
     generateDay: '/meal-plans/generate/day',
+    generateWeek: '/meal-plans/week/generate',
     day: '/meal-plans/day',
     replacementCandidates: (planId, itemId) => `/meal-plans/${planId}/items/${itemId}/replacement-candidates`,
     replaceItem: (planId, itemId) => `/meal-plans/${planId}/items/${itemId}/replace`,
@@ -51,6 +52,8 @@ export const ENDPOINTS = {
     completion: (planId) => `/meal-plans/${planId}/completion`,
     toRecords: (planId) => `/meal-plans/${planId}/to-records`,
     shoppingList: (planId) => `/meal-plans/${planId}/shopping-list`,
+    weekShoppingList: '/meal-plans/week/shopping-list',
+    weekPoster: '/meal-plans/week/poster',
   },
   aiAdvisor: {
     chat: '/ai/advisor/chat',
@@ -84,6 +87,7 @@ export const ENDPOINTS = {
     byId: (id) => `/nutrition-reports/${id}`,
   },
   aiRecipes: {
+    generate: '/ai-recipes/generate',
     parse: '/ai-recipes/parse',
     parseImage: '/ai-recipes/parse-image',
     byId: (id) => `/ai-recipes/${id}`,
@@ -106,6 +110,7 @@ export const ENDPOINTS = {
     disableUser: (id) => `/admin/users/${id}/disable`,
     reviewRecipe: (id) => `/admin/recipes/${id}/review`,
     reviewPost: (id) => `/admin/community/posts/${id}/review`,
+    deletePost: (id) => `/admin/community/posts/${id}`,
     aiCallLogs: '/admin/ai-call-logs',
     nutritionRiskResults: '/admin/nutrition-risk-results',
     nutritionReportStatistics: '/admin/nutrition-reports/statistics',

@@ -1,6 +1,7 @@
 package com.example.indras.airecipe.controller;
 
 import com.example.indras.airecipe.dto.AiRecipeParseRequest;
+import com.example.indras.airecipe.dto.AiRecipeGenerateRequest;
 import com.example.indras.airecipe.dto.AiRecipeToMealRecordRequest;
 import com.example.indras.airecipe.service.AiRecipeService;
 import com.example.indras.airecipe.vo.AiRecipeListItemVO;
@@ -28,6 +29,11 @@ public class AiRecipeController {
     @PostMapping("/parse")
     public ApiResponse<AiRecipeVO> parseText(@Valid @RequestBody AiRecipeParseRequest request) {
         return ApiResponse.success(aiRecipeService.parseText(UserContext.requireUserId(), request));
+    }
+
+    @PostMapping("/generate")
+    public ApiResponse<AiRecipeVO> generate(@RequestBody AiRecipeGenerateRequest request) {
+        return ApiResponse.success(aiRecipeService.generate(UserContext.requireUserId(), request));
     }
 
     @PostMapping("/parse-image")

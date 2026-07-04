@@ -141,13 +141,15 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public PageResult<CommunityPostListItemVO> pagePosts(Long userId, PageQuery query, String status) {
+        boolean allStatus = "ALL".equalsIgnoreCase(status);
         String dbStatus = toDbStatus(status);
-        if (!StringUtils.hasText(dbStatus) && !"ADMIN".equals(UserContext.getRole())) {
+        if (!StringUtils.hasText(dbStatus) && !allStatus) {
             dbStatus = "ONLINE";
         }
         Page<CommunityPost> page = communityPostMapper.selectPage(new Page<>(query.getPage(), query.getSize()),
                 Wrappers.<CommunityPost>lambdaQuery()
                         .eq(StringUtils.hasText(dbStatus), CommunityPost::getStatus, dbStatus)
+                        .ne(allStatus, CommunityPost::getStatus, "DELETED")
                         .like(StringUtils.hasText(query.getKeyword()), CommunityPost::getTitle, query.getKeyword())
                         .orderByDesc(CommunityPost::getId));
         return PageUtils.toPageResult(page, post -> toListItem(post, userId));
@@ -362,6 +364,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     private String toDbStatus(String status) {
         if (!StringUtils.hasText(status)) {
+            return null;
+        }
+        if ("ALL".equalsIgnoreCase(status)) {
             return null;
         }
         return "PUBLISHED".equals(status) ? "ONLINE" : status;

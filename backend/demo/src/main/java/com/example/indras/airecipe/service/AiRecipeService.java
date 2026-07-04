@@ -1,6 +1,7 @@
 package com.example.indras.airecipe.service;
 
 import com.example.indras.airecipe.dto.AiRecipeParseRequest;
+import com.example.indras.airecipe.dto.AiRecipeGenerateRequest;
 import com.example.indras.airecipe.dto.AiRecipeToMealRecordRequest;
 import com.example.indras.airecipe.vo.AiRecipeListItemVO;
 import com.example.indras.airecipe.vo.AiRecipeVO;
@@ -15,6 +16,8 @@ import java.util.Map;
 public interface AiRecipeService {
 
     AiRecipeVO parseText(Long userId, AiRecipeParseRequest request);
+
+    AiRecipeVO generate(Long userId, AiRecipeGenerateRequest request);
 
     AiRecipeVO parseImage(Long userId, MultipartFile file, String prompt);
 

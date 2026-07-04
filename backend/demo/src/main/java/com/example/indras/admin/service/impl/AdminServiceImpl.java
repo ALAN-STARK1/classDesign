@@ -119,6 +119,18 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deletePost(Long id) {
+        UserContext.requireAdmin();
+        CommunityPost post = communityPostMapper.selectById(id);
+        if (post == null) {
+            throw BizException.notFound("帖子不存在");
+        }
+        post.setStatus("DELETED");
+        communityPostMapper.updateById(post);
+    }
+
+    @Override
     public PageResult<AiCallLogVO> pageAiCallLogs(PageQuery query) {
         UserContext.requireAdmin();
         Page<AiCallLog> page = aiCallLogMapper.selectPage(new Page<>(query.getPage(), query.getSize()),

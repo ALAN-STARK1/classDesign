@@ -45,6 +45,12 @@ public class AdminController {
         return ApiResponse.success(adminService.reviewPost(id, request));
     }
 
+    @DeleteMapping("/community/posts/{id}")
+    public ApiResponse<Void> deletePost(@PathVariable Long id) {
+        adminService.deletePost(id);
+        return ApiResponse.success(null);
+    }
+
     @GetMapping("/ai-call-logs")
     public ApiResponse<PageResult<AiCallLogVO>> pageAiCallLogs(PageQuery query) {
         return ApiResponse.success(adminService.pageAiCallLogs(query));

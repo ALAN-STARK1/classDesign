@@ -29,6 +29,11 @@ public class MealPlanController {
         return ApiResponse.success(mealPlanService.generateDayPlan(UserContext.requireUserId(), request));
     }
 
+    @PostMapping("/week/generate")
+    public ApiResponse<List<MealPlanVO>> generateWeekPlan(@Valid @RequestBody MealPlanGenerateRequest request) {
+        return ApiResponse.success(mealPlanService.generateWeekPlan(UserContext.requireUserId(), request));
+    }
+
     @GetMapping("/day")
     public ApiResponse<MealPlanVO> getDayPlan(
             @RequestParam(name = "date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate planDate) {
@@ -84,5 +89,17 @@ public class MealPlanController {
     @GetMapping("/{planId}/shopping-list")
     public ApiResponse<ShoppingListVO> shoppingList(@PathVariable Long planId) {
         return ApiResponse.success(mealPlanService.shoppingList(UserContext.requireUserId(), planId));
+    }
+
+    @GetMapping("/week/shopping-list")
+    public ApiResponse<ShoppingListVO> weekShoppingList(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
+        return ApiResponse.success(mealPlanService.weeklyShoppingList(UserContext.requireUserId(), startDate));
+    }
+
+    @GetMapping("/week/poster")
+    public ApiResponse<WeeklyMealPosterVO> weekPoster(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
+        return ApiResponse.success(mealPlanService.weeklyPoster(UserContext.requireUserId(), startDate));
     }
 }

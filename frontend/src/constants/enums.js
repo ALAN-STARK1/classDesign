@@ -18,7 +18,7 @@ export const RiskRuleStatus = ['ENABLED', 'DISABLED']
 export const ReportType = ['WEEKLY', 'MONTHLY']
 export const ReportStatus = ['GENERATING', 'READY', 'FAILED']
 export const AiRecipeStatus = ['PARSED', 'CONFIRMED', 'CONVERTED', 'DELETED']
-export const AiRecipeSourceType = ['TEXT', 'IMAGE']
+export const AiRecipeSourceType = ['TEXT', 'IMAGE', 'GENERATED']
 export const CommunityPostStatus = ['PENDING', 'PUBLISHED', 'REJECTED']
 
 export const CommonTags = {

@@ -117,12 +117,14 @@ export const AiRecipeStatusLabel = {
 export const AiRecipeSourceTypeLabel = {
   TEXT: '文本解析',
   IMAGE: '图片识别',
+  GENERATED: '原创生成',
 }
 
 export const CommunityPostStatusLabel = {
   PENDING: '审核中',
   PUBLISHED: '已发布',
   REJECTED: '已拒绝',
+  DELETED: '已删除',
 }
 
 export function toOptions(values, labelMap) {

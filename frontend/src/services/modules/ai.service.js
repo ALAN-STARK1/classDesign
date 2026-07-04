@@ -15,8 +15,16 @@ function normalizeAiRecipe(data) {
     steps: data.steps || data.cookingSteps || [],
     ingredients: data.ingredients || [],
     warnings: data.warnings || [],
+    healthTips: data.healthTips || [],
+    shoppingHints: data.shoppingHints || [],
+    imagePrompt: data.imagePrompt || '',
+    visualDescription: data.visualDescription || '',
     sourceImageUrl: data.sourceImageUrl,
   }
+}
+
+export function generateAiRecipe(payload) {
+  return request.post(ENDPOINTS.aiRecipes.generate, payload, { timeout: AI_REQUEST_TIMEOUT }).then(normalizeAiRecipe)
 }
 
 export function parseAiRecipeText(payload) {

@@ -14,7 +14,10 @@ import {
   fetchReplaceLogs,
   fetchDayMealPlan,
   fetchShoppingList,
+  fetchWeekPoster,
+  fetchWeekShoppingList,
   generateDayMealPlan,
+  generateWeekMealPlan,
   replaceMealPlanItem,
   submitPlanItemFeedback,
 } from '../../services/modules/meal.service'
@@ -35,6 +38,9 @@ const candidateDrawer = ref(false)
 const shoppingDrawer = ref(false)
 const shoppingLoading = ref(false)
 const shoppingList = ref(null)
+const weekPosterDrawer = ref(false)
+const weekPosterLoading = ref(false)
+const weekPoster = ref(null)
 const feedbackDialog = ref(false)
 const activeItem = ref(null)
 const candidateLoading = ref(false)
@@ -100,6 +106,19 @@ async function generate() {
   }
 }
 
+async function generateWeek() {
+  generating.value = true
+  try {
+    await generateWeekMealPlan({ date: query.date, targetCalorie: query.targetCalorie })
+    await load()
+    ElMessage.success('一周膳食计划已生成')
+  } catch (err) {
+    handleRequestError(err)
+  } finally {
+    generating.value = false
+  }
+}
+
 async function openCandidates(item) {
   activeItem.value = item
   candidateDrawer.value = true
@@ -157,6 +176,29 @@ async function openShoppingList() {
   }
 }
 
+async function openWeekPoster() {
+  weekPosterDrawer.value = true
+  weekPosterLoading.value = true
+  try {
+    const [poster, shopping] = await Promise.all([
+      fetchWeekPoster({ startDate: query.date }),
+      fetchWeekShoppingList({ startDate: query.date }).catch(() => null),
+    ])
+    weekPoster.value = {
+      ...poster,
+      shoppingItems: poster?.shoppingItems?.length ? poster.shoppingItems : shopping?.items || [],
+    }
+  } catch (err) {
+    handleRequestError(err)
+  } finally {
+    weekPosterLoading.value = false
+  }
+}
+
+function printPoster() {
+  window.print()
+}
+
 async function convertToRecords() {
   try {
     await ElMessageBox.confirm('确认把当前计划的所有餐项生成膳食记录？', '生成记录', { type: 'warning' })
@@ -191,6 +233,8 @@ onMounted(load)
           <el-input-number v-model="query.targetCalorie" :min="900" :max="4200" />
           <el-button :icon="Search" @click="load">查询</el-button>
           <el-button type="primary" :icon="Refresh" :loading="generating" @click="generate">生成计划</el-button>
+          <el-button :icon="Tickets" :loading="generating" @click="generateWeek">生成一周</el-button>
+          <el-button :icon="ShoppingCart" @click="openWeekPoster">一周海报</el-button>
         </div>
       </div>
     </article>
@@ -330,6 +374,54 @@ onMounted(load)
             </el-table-column>
             <el-table-column prop="category" label="分类" width="100" />
           </el-table>
+        </template>
+      </div>
+    </el-drawer>
+
+    <el-drawer v-model="weekPosterDrawer" title="一周膳食海报" size="760px">
+      <div v-loading="weekPosterLoading" class="side-stack">
+        <StateBlock
+          v-if="!weekPoster?.days?.length"
+          title="暂无周计划"
+          description="先生成一周计划后，即可查看海报与周采购清单。"
+          :show-action="false"
+        />
+        <template v-else>
+          <section class="weekly-poster">
+            <div class="poster-cover">
+              <span class="eyebrow">WEEKLY MEAL POSTER</span>
+              <h2>{{ weekPoster.startDate }} 至 {{ weekPoster.endDate }}</h2>
+              <p>{{ weekPoster.summary }}</p>
+              <div class="nutrition-strip">
+                <span>目标 {{ weekPoster.healthGoal || '均衡饮食' }}</span>
+                <span>总热量 {{ formatCalorie(weekPoster.totalCalorie) }}</span>
+                <span>日目标 {{ formatCalorie(weekPoster.targetCalorie) }}</span>
+              </div>
+            </div>
+            <div class="week-grid">
+              <article v-for="day in weekPoster.days" :key="day.date" class="week-day-card">
+                <strong>{{ day.date }}</strong>
+                <small>{{ formatCalorie(day.totalCalorie) }}</small>
+                <p v-for="meal in day.meals" :key="meal.id">
+                  {{ MealTypeLabel[meal.mealType] }}：{{ meal.recipeName }}
+                </p>
+              </article>
+            </div>
+            <article class="panel inset-panel">
+              <div class="section-heading">
+                <div>
+                  <span class="eyebrow">SHOPPING</span>
+                  <h2>周采购清单</h2>
+                </div>
+              </div>
+              <div class="shopping-chip-list">
+                <span v-for="item in weekPoster.shoppingItems" :key="item.name">
+                  {{ item.name }} {{ item.amount }}{{ item.unit }}
+                </span>
+              </div>
+            </article>
+          </section>
+          <el-button type="primary" class="wide-control" :icon="Tickets" @click="printPoster">打印/导出海报</el-button>
         </template>
       </div>
     </el-drawer>

@@ -1422,6 +1422,61 @@ h2 {
   text-transform: uppercase;
 }
 
+.weekly-poster {
+  background: linear-gradient(145deg, rgba(30, 215, 96, 0.12), transparent 45%), var(--surface);
+  border: 1px solid var(--surface-3);
+  border-radius: 18px;
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+}
+
+.poster-cover {
+  display: grid;
+  gap: 10px;
+}
+
+.poster-cover h2 {
+  font-size: 26px;
+  margin: 0;
+}
+
+.week-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.week-day-card {
+  background: var(--surface-2);
+  border: 1px solid var(--surface-3);
+  border-radius: 14px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.week-day-card p {
+  color: var(--text-soft);
+  font-size: 13px;
+  margin: 0;
+}
+
+.shopping-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shopping-chip-list span {
+  background: rgba(30, 215, 96, 0.12);
+  border: 1px solid rgba(30, 215, 96, 0.28);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
 .el-button--primary {
   --el-button-bg-color: var(--green);
   --el-button-border-color: var(--green);

@@ -21,7 +21,12 @@ public class AiRecipeVO {
     private NutritionEstimateVO nutritionEstimate;
     private List<AiIngredientVO> ingredients;
     private List<String> cookingSteps;
+    private List<String> steps;
+    private List<String> healthTips;
     private List<String> warnings;
+    private List<String> shoppingHints;
+    private String imagePrompt;
+    private String visualDescription;
     private List<RecognizedFoodVO> recognizedFoods;
     private String sourceImageUrl;
     private String sourceType;
