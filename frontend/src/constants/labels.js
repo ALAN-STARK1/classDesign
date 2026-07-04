@@ -66,6 +66,7 @@ export const MealTypeLabel = RecipeCategoryLabel
 
 export const MealPlanStatusLabel = {
   DRAFT: '草稿',
+  ACTIVE: '进行中',
   GENERATED: '已生成',
   CONFIRMED: '已确认',
   COMPLETED: '已完成',

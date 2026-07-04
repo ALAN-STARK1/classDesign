@@ -222,7 +222,7 @@ async function uploadPostImage(file) {
     const uploaded = await uploadCommunityPostImage(file)
     postForm.images.push({
       id: uploaded.imageId,
-      url: uploaded.imageUrl,
+      url: resolveUploadUrl(uploaded.imageUrl),
       width: uploaded.width,
       height: uploaded.height,
       fileSize: uploaded.fileSize,
@@ -235,6 +235,11 @@ async function uploadPostImage(file) {
     uploadingPostImage.value = false
   }
   return false
+}
+
+async function handlePostImageChange(uploadFile) {
+  if (!uploadFile?.raw) return
+  await uploadPostImage(uploadFile.raw)
 }
 
 async function publishPost() {
@@ -254,7 +259,7 @@ async function publishPost() {
       aiSourceImageUrl: detail.value.sourceImageUrl || '',
       imageIds: postForm.images.map((item) => item.id),
     })
-    ElMessage.success('已提交社区审核')
+    ElMessage.success('已发布到社区')
     resetPostForm()
   } catch (err) {
     handleRequestError(err)
@@ -475,7 +480,7 @@ onBeforeUnmount(clearPreviewUrls)
                   :show-file-list="false"
                   :auto-upload="false"
                   accept=".jpg,.jpeg,.png,.webp"
-                  :before-upload="uploadPostImage"
+                  :on-change="handlePostImageChange"
                 >
                   <el-icon><Upload /></el-icon>
                   <div class="upload-copy">{{ uploadingPostImage ? '上传中...' : '补充社区图片' }}</div>

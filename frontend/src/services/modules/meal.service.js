@@ -1,26 +1,63 @@
 import { ENDPOINTS } from '../../api/endpoints'
 import { request } from '../request/http'
 
+function normalizeMealPlan(plan) {
+  if (!plan) return null
+  return {
+    ...plan,
+    status: plan.status || 'ACTIVE',
+    summary: plan.summary || {
+      calorie: plan.actualCalorie,
+      protein: plan.protein || 0,
+      fat: plan.fat || 0,
+      carbohydrate: plan.carbohydrate || 0,
+    },
+    items: (plan.items || []).map((item) => ({
+      ...item,
+      status: item.status || 'PLANNED',
+      description: item.description || item.recommendReason || '根据健康档案与热量目标推荐',
+      protein: item.protein ?? '-',
+      fat: item.fat ?? '-',
+      carbohydrate: item.carbohydrate ?? '-',
+    })),
+  }
+}
+
 export function generateDayMealPlan(payload) {
   return request.post(ENDPOINTS.mealPlans.generateDay, {
     planDate: payload.planDate ?? payload.date,
     targetCalorie: payload.targetCalorie,
     goalCycleId: payload.goalCycleId,
-  })
+  }).then(normalizeMealPlan)
 }
 
 export function fetchDayMealPlan(params) {
   return request.get(ENDPOINTS.mealPlans.day, {
     params: { date: params.date ?? params.planDate },
+  }).then(normalizeMealPlan).catch((error) => {
+    if (error?.code === 40400 || error?.message?.includes('暂无膳食计划')) {
+      return null
+    }
+    throw error
   })
 }
 
 export function fetchReplacementCandidates(planId, itemId, params) {
-  return request.get(ENDPOINTS.mealPlans.replacementCandidates(planId, itemId), { params })
+  return request.get(ENDPOINTS.mealPlans.replacementCandidates(planId, itemId), { params }).then((items) =>
+    (items || []).map((item) => ({
+      ...item,
+      reason: item.reason || item.recommendReason || '热量接近当前餐项',
+      protein: item.protein ?? '-',
+    })),
+  )
 }
 
 export function replaceMealPlanItem(planId, itemId, payload) {
-  return request.patch(ENDPOINTS.mealPlans.replaceItem(planId, itemId), payload)
+  return request.patch(ENDPOINTS.mealPlans.replaceItem(planId, itemId), {
+    newRecipeId: payload.newRecipeId ?? payload.recipeId,
+    replaceReason: payload.replaceReason ?? payload.reason ?? payload.recommendReason ?? 'USER_SELECTED',
+    remark: payload.remark,
+  }).then(normalizeMealPlan)
 }
 
 export function fetchReplaceLogs(planId) {
@@ -28,7 +65,14 @@ export function fetchReplaceLogs(planId) {
 }
 
 export function submitPlanItemFeedback(planId, itemId, payload) {
-  return request.post(ENDPOINTS.mealPlans.feedbackItem(planId, itemId), payload)
+  const feedbackStatus = payload.status || payload.level
+  return request.post(ENDPOINTS.mealPlans.feedbackItem(planId, itemId), {
+    status: feedbackStatus === 'DISLIKE' ? 'PARTIAL' : 'COMPLETED',
+    actualRatio: payload.actualRatio ?? 1,
+    reason: payload.reason,
+    remark: payload.remark ?? payload.note,
+    createMealRecord: payload.createMealRecord ?? false,
+  })
 }
 
 export function fetchPlanFeedback(planId) {

@@ -10,6 +10,14 @@ export default defineConfig(({ mode }) => {
     plugins: [vue()],
     server: {
       proxy: {
+        '/api': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
+        '/uploads': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
         '/ai-bridge': {
           target: 'http://localhost:8000',
           changeOrigin: true,

@@ -8,6 +8,7 @@ import com.example.indras.common.api.PageQuery;
 import com.example.indras.common.api.PageResult;
 import com.example.indras.common.context.UserContext;
 import com.example.indras.common.exception.BizException;
+import com.example.indras.common.storage.LocalFileStorageService;
 import com.example.indras.common.util.JsonHelper;
 import com.example.indras.common.util.PageUtils;
 import com.example.indras.common.vo.NutritionVO;
@@ -44,16 +45,16 @@ public class CommunityServiceImpl implements CommunityService {
     private final AiRecipeMapper aiRecipeMapper;
     private final UserProfileMapper userProfileMapper;
     private final JsonHelper jsonHelper;
+    private final LocalFileStorageService localFileStorageService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public PostImageUploadVO uploadPostImage(Long userId, MultipartFile file) {
-        String key = "community/" + UUID.randomUUID() + ".webp";
-        String url = "/uploads/community/" + key;
+        LocalFileStorageService.StoredFile storedFile = localFileStorageService.saveCommunityPostImage(file);
         CommunityPostImage image = CommunityPostImage.builder()
                 .userId(userId)
-                .storageKey(key)
-                .imageUrl(url)
+                .storageKey(storedFile.key())
+                .imageUrl(storedFile.url())
                 .sortNo(0)
                 .width(1280)
                 .height(960)
@@ -82,10 +83,11 @@ public class CommunityServiceImpl implements CommunityService {
                 .recipeName(request.getRecipeName())
                 .tagsJson(jsonHelper.write(request.getTags() == null ? List.of() : request.getTags()))
                 .sourceType("MANUAL")
-                .status("PENDING")
+                .status("ONLINE")
                 .likeCount(0)
                 .commentCount(0)
                 .favoriteCount(0)
+                .publishedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
         communityPostMapper.insert(post);
@@ -127,10 +129,11 @@ public class CommunityServiceImpl implements CommunityService {
                 .tagsJson("[]")
                 .sourceType("AI_RECIPE")
                 .sourceId(aiRecipeId)
-                .status("PENDING")
+                .status("ONLINE")
                 .likeCount(0)
                 .commentCount(0)
                 .favoriteCount(0)
+                .publishedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
         communityPostMapper.insert(post);

@@ -4,9 +4,7 @@ import { request } from '../request/http'
 export function uploadCommunityPostImage(file) {
   const formData = new FormData()
   formData.append('file', file)
-  return request.post(ENDPOINTS.community.postImages, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
+  return request.post(ENDPOINTS.community.postImages, formData)
 }
 
 export function createCommunityPost(payload) {

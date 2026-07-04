@@ -15,6 +15,7 @@ import {
 } from '../../services/modules/community.service'
 import { handleRequestError } from '../../services/request/http'
 import { formatCalorie } from '../../utils/format'
+import { resolveUploadUrl } from '../../utils/media'
 
 const MAX_IMAGES = 9
 
@@ -43,7 +44,11 @@ const commentForm = reactive({
 const createImageCountText = computed(() => `${form.images.length}/${MAX_IMAGES}`)
 
 function syncDetailImage() {
-  activeDetailImage.value = detail.value?.images?.[0]?.url || detail.value?.coverImageUrl || ''
+  activeDetailImage.value = imageSrc(detail.value?.images?.[0]?.url || detail.value?.coverImageUrl)
+}
+
+function imageSrc(url) {
+  return resolveUploadUrl(url)
 }
 
 function resetCreateForm() {
@@ -99,7 +104,7 @@ async function uploadCreateImage(file) {
     const uploaded = await uploadCommunityPostImage(file)
     form.images.push({
       id: uploaded.imageId,
-      url: uploaded.imageUrl,
+      url: imageSrc(uploaded.imageUrl),
       width: uploaded.width,
       height: uploaded.height,
       fileSize: uploaded.fileSize,
@@ -112,6 +117,11 @@ async function uploadCreateImage(file) {
     uploading.value = false
   }
   return false
+}
+
+async function handleCreateImageChange(uploadFile) {
+  if (!uploadFile?.raw) return
+  await uploadCreateImage(uploadFile.raw)
 }
 
 async function submitPost() {
@@ -132,7 +142,7 @@ async function submitPost() {
         .map((item) => item.trim())
         .filter(Boolean),
     })
-    ElMessage.success('帖子已提交审核')
+    ElMessage.success('帖子已发布')
     dialogVisible.value = false
     resetCreateForm()
     await load()
@@ -226,7 +236,7 @@ onMounted(load)
       <div class="community-grid">
         <article v-for="post in posts" :key="post.id" class="community-card">
           <button v-if="post.coverImageUrl" class="community-cover" type="button" @click="openDetail(post)">
-            <img :src="post.coverImageUrl" :alt="post.title" />
+            <img :src="imageSrc(post.coverImageUrl)" :alt="post.title" />
             <span v-if="post.imageCount > 1" class="community-count">{{ post.imageCount }} 张</span>
           </button>
           <div v-else class="community-cover community-cover-fallback">
@@ -288,7 +298,7 @@ onMounted(load)
               :show-file-list="false"
               :auto-upload="false"
               accept=".jpg,.jpeg,.png,.webp"
-              :before-upload="uploadCreateImage"
+              :on-change="handleCreateImageChange"
             >
               <el-icon><Upload /></el-icon>
               <div class="upload-copy">{{ uploading ? '上传中...' : '上传社区图片' }}</div>
@@ -334,11 +344,11 @@ onMounted(load)
               v-for="image in detail.images"
               :key="image.id"
               class="community-gallery-thumb"
-              :class="{ active: activeDetailImage === image.url }"
+              :class="{ active: activeDetailImage === imageSrc(image.url) }"
               type="button"
-              @click="activeDetailImage = image.url"
+              @click="activeDetailImage = imageSrc(image.url)"
             >
-              <img :src="image.url" :alt="detail.title" />
+              <img :src="imageSrc(image.url)" :alt="detail.title" />
             </button>
           </div>
         </div>
